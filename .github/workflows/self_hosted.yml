@@ -1,8 +1,8 @@
 name: self_hosted Run News Scraper with logs
 
 on:
-  schedule:
-    - cron: '0 */1 * * *'  # Run every 2 hours
+  # schedule:
+  #   - cron: '0 */1 * * *'  # Run every 2 hours
   workflow_dispatch:      # manual trigger
 
 # Prevent multiple instances from running simultaneously
@@ -21,10 +21,10 @@ jobs:
           persist-credentials: false
           fetch-depth: 0  # Fetch all history to avoid rebase issues
 
-      - name: Set up Python 3.10
+      - name: Set up Python 3.13
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.13'
           cache: 'pip' # Caches pip packages automatically
 
       # --- CACHE AI MODELS ---

@@ -30,12 +30,17 @@ import logging
 import sqlite3
 from datetime import datetime
 import random  # <-- For User-Agent rotation
-import os  # <-- NEW: Import os for the hard exit
-import uuid # <-- NEW: For Cluster IDs
+import os  # <-- Import os for the hard exit
+import uuid # <-- For Cluster IDs
 
 # --- NEW: Imports for AI/Semantics ---
 # You must run: pip install sentence-transformers
-from sentence_transformers import SentenceTransformer, util
+try:
+    from sentence_transformers import SentenceTransformer, util
+except ImportError:
+    logging.critical("sentence-transformers not installed. Run 'pip install sentence-transformers'. AI clustering will be skipped.")
+    SentenceTransformer = None
+    util = None
 # -------------------------------------
 
 # --- NEW: Imports for Parallelism ---
@@ -46,7 +51,6 @@ import threading
 # --- UPDATED: Import Selenium ---
 try:
     from selenium import webdriver
-    # from selenium.webdriver.chrome.service import Service as ChromeService # <-- REMOVED
     from selenium.webdriver.chrome.options import Options as ChromeOptions
     from selenium.common.exceptions import WebDriverException
     # --- NEW: Imports for Explicit Waits ---
@@ -82,9 +86,7 @@ def create_robust_session():
         backoff_factor=1,
         # Retry on server errors and specific connection-related codes
         status_forcelist=[500, 502, 503, 504],
-        # --- NEW: Retry on connection and read errors ---
         allowed_methods=["HEAD", "GET"],
-        # We explicitly retry on these types of errors
         connect=True, # Retry on connection errors
         read=True,    # Retry on read errors
     )
@@ -213,15 +215,17 @@ SOURCE_CONFIG = [
 # ==============================================================================
 # AI MODEL INITIALIZATION (NEW)
 # ==============================================================================
-try:
-    logging.info("Loading AI Semantic Model (all-MiniLM-L6-v2)...")
-    # This downloads/loads the model once when the script starts
-    semantic_model = SentenceTransformer('all-MiniLM-L6-v2')
-    logging.info("AI Model loaded successfully.")
-except Exception as e:
-    logging.critical(f"Failed to load AI model: {e}")
-    # We will handle the failure inside the deduplication function
-    semantic_model = None
+semantic_model = None
+if SentenceTransformer is not None:
+    try:
+        logging.info("Loading AI Semantic Model (all-MiniLM-L6-v2)...")
+        # This downloads/loads the model once when the script starts
+        semantic_model = SentenceTransformer('all-MiniLM-L6-v2')
+        logging.info("AI Model loaded successfully.")
+    except Exception as e:
+        logging.critical(f"Failed to load AI model: {e}. Clustering is disabled.")
+        semantic_model = None
+
 
 # ==============================================================================
 # DATABASE SETUP
@@ -274,8 +278,8 @@ def get_cluster_id_for_article(new_title, new_summary):
     If a semantically similar article exists, returns its cluster_id.
     If not, returns a new unique cluster_id.
     """
-    if semantic_model is None:
-        # Fallback if model failed to load
+    if semantic_model is None or util is None:
+        # Fallback if model failed to load or dependencies are missing
         return str(uuid.uuid4())
 
     try:
@@ -320,7 +324,6 @@ def get_cluster_id_for_article(new_title, new_summary):
             logging.info(f"DEDUPLICATION: Found match (Score: {best_score:.2f}). Linking to Cluster ID: {existing_ids[best_idx]}")
             return existing_ids[best_idx]
         else:
-            # logging.info(f"No match found (Best Score: {best_score:.2f}). Creating new Cluster ID.")
             return str(uuid.uuid4())
             
     except Exception as e:
@@ -356,14 +359,13 @@ def save_article(source, title, url, summary, image_url):
         with db_lock:
             # We must acquire the lock *before* checking and inserting
             
-            # First, check if the URL already exists
+            # First, check if the URL already exists (the primary skip)
             cursor.execute("SELECT id FROM news WHERE url = ?", (url,))
             if cursor.fetchone():
                 logging.info(f"Duplicate article skipped: {title} from {source}")
                 return False # Not saved
             
             # --- NEW: Get Cluster ID ---
-            # We do this INSIDE the lock to ensure we compare against the latest committed data
             cluster_id = get_cluster_id_for_article(title, summary)
             # ---------------------------
 
@@ -392,22 +394,18 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     name = source_config['name']
     rss_url = source_config['rss_url']
     
-    # --- MODIFIED: Return count of *saved* articles ---
     articles_saved_list = []
-    # --------------------------------------------------
     
     logging.info(f"Starting scrape for {name} RSS feed: {rss_url}")
     
     try:
         # 1. Get RSS Feed
         rss_headers = get_headers(source_config['rss_headers_type'])
-        # --- UPDATED: Pass proxies to session.get ---
-        response = session.get(rss_url, headers=rss_headers, timeout=15, proxies=proxies_dict) 
+        response = session.get(rss_url, headers=rss_headers, timeout=15, proxies=proxies_dict)  
         response.raise_for_status() # Will raise an error for 4xx/5xx
         
         soup = BeautifulSoup(response.content, 'xml')
         items = soup.find_all('item')
-        # --- UPDATED: Use new MAX_ARTICLES_PER_SOURCE variable ---
         logging.info(f"Found {len(items)} articles in {name} RSS feed. Processing up to {MAX_ARTICLES_PER_SOURCE}.")
 
         # 2. Process each article
@@ -424,6 +422,15 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                         logging.warning(f"[{name}] Skipping non-article link: {article_url}")
                         continue
                 
+                # --- NEW: Early Skip Check from user request ---
+                with db_lock:
+                    cursor.execute("SELECT id FROM news WHERE url = ?", (article_url,))
+                    if cursor.fetchone():
+                        logging.info(f"[{name}] Early skip: URL {article_url} already exists.")
+                        time.sleep(random.uniform(0.1, 0.3)) # Politeness delay
+                        continue # Skip to the next article in the RSS feed
+                # ----------------------------------------------
+
                 rss_title = item.title.text if item.title else "Title not found"
                 
                 # --- NEW MULTI-STRATEGY LOGIC ---
@@ -446,33 +453,26 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             article_headers = get_headers(header_type)
                             article_headers['Referer'] = source_config['referer']
                             
-                            # --- UPDATED: Pass proxies to session.get ---
                             page_response = session.get(article_url, headers=article_headers, timeout=10, proxies=proxies_dict)
                             page_response.raise_for_status()
                             raw_html = page_response.text
                         
                         elif strategy == 'selenium_browser':
                             # 3. Download Article Page with SELENIUM
-                            # Selenium driver is already configured with proxy, if set
                             if not selenium_driver:
                                 logging.error(f"[{name}] Selenium strategy selected but driver is not available. Skipping.")
                                 continue # Try next strategy
                             
                             selenium_driver.get(article_url)
                             
-                            # --- MODIFIED: Use Explicit Wait instead of time.sleep() ---
-                            # This is *much* faster and more reliable.
-                            # We wait up to 10s for *any* <p> tag to appear.
-                            # This indicates the main content has likely started loading.
+                            # Use Explicit Wait
                             try:
                                 WebDriverWait(selenium_driver, 10).until(
                                     EC.presence_of_element_located((By.TAG_NAME, "p"))
                                 )
                                 logging.info(f"[{name}] Page content loaded.")
                             except TimeoutException:
-                                # If no <p> tags appear, the page is likely broken
                                 logging.warning(f"[{name}] Page timed out (10s). No <p> tags found. Proceeding anyway.")
-                            # -----------------------------------------------------------
                             
                             raw_html = selenium_driver.page_source
                         
@@ -486,14 +486,12 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             logging.warning(f"[{name}] FAILED with '{strategy}' (HTML was empty).")
                             continue # Try next strategy
 
-                        # --- NEW: Added try/except around trafilatura ---
                         temp_summary = None
                         try:
                             temp_summary = trafilatura.extract(raw_html, include_comments=False, include_tables=False)
                         except Exception as e:
                             logging.error(f"[{name}] trafilatura failed to parse HTML: {e}")
                         
-                        # --- NEW: Check word count ---
                         word_count = 0
                         if temp_summary:
                             word_count = len(temp_summary.split())
@@ -503,7 +501,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             logging.info(f"[{name}] Success with '{strategy}'. Found content ({word_count} words).")
                             summary = temp_summary
                             
-                            # Since we have good HTML, parse metadata
+                            # Parse metadata
                             soup = BeautifulSoup(raw_html, 'html.parser')
                             page_title = soup.find('title')
                             if page_title:
@@ -519,10 +517,8 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     
                     except Exception as e:
                         # Catching errors from requests OR selenium
-                        # --- MODIFIED: Log the specific URL in this error ---
                         logging.error(f"[{name}] Request failed for strategy '{strategy}' on URL {article_url}: {e}")
-                        # ----------------------------------------------------
-                    
+                        
                     # Wait a moment before trying the next strategy
                     if i < len(strategies) - 1:
                         time.sleep(random.uniform(0.5, 1.0))
@@ -530,7 +526,6 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                 # --- END OF STRATEGY LOOP ---
 
                 # 5. Fallback Logic
-                # This block only runs if ALL strategies in the loop failed
                 if not summary:
                     logging.error(f"[{name}] All scrape strategies failed for {article_url}. Falling back to RSS description.")
                     if item.description:
@@ -540,13 +535,11 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     else:
                         summary = "No content available"
 
-                # 6. Save
-                # --- MODIFIED: Check return value from save_article ---
+                # 6. Save (The save_article function runs the final URL duplicate check again)
                 was_saved = save_article(name, final_title, article_url, summary, image_url)
                 if was_saved:
                     articles_saved_list.append(final_title)
-                # ------------------------------------------------------
-                
+                    
                 time.sleep(random.uniform(0.5, 1.5)) # Politeness delay between *articles*
 
             except Exception as e:
@@ -575,7 +568,7 @@ def scrape_source_wrapper(source, session, proxies_dict):
     needs_selenium = any('selenium' in s for s in source.get('article_strategies', []))
     
     try:
-        if needs_selenium:
+        if needs_selenium and SELENIUM_AVAILABLE:
             logging.info(f"[{name}] (Thread) requires Selenium. Initializing driver...")
             driver = create_selenium_driver() # Create a driver *inside* the thread
             if not driver:
@@ -591,15 +584,15 @@ def scrape_source_wrapper(source, session, proxies_dict):
     
     finally:
         # --- MODIFIED: "Surgical Kill" for the driver ---
-        # This is the robust way to clean up a stuck driver.
         if driver:
             logging.info(f"[{name}] (Thread) Finished. Attempting to shut down its Selenium driver.")
             pid_to_kill = None
             try:
                 # Get the Process ID (PID) of the chromedriver service
+                # This is fragile, but helps on many systems
                 pid_to_kill = driver.service.process.pid
             except Exception:
-                pass # If we can't get it, we can't kill it.
+                pass
             
             try:
                 # Try the clean quit first
@@ -644,8 +637,6 @@ def scrape_all():
     total_saved = 0
     futures = [] # To store the thread tasks
     
-    # --- MODIFIED: Use manual executor, not `with` block ---
-    # This allows us to shut it down without waiting (wait=False)
     executor = ThreadPoolExecutor(max_workers=len(SOURCE_CONFIG))
 
     try:
@@ -658,7 +649,6 @@ def scrape_all():
         logging.info(f"Submitted {len(futures)} jobs to thread pool. Waiting up to 300s for completion...")
         
         # 2. Wait for jobs to complete, with a 5-minute (300s) timeout
-        # `wait` returns two sets: one for done, one for not_done (timed out)
         done, not_done = wait(futures, timeout=300)
 
         # 3. Process completed jobs
@@ -674,10 +664,7 @@ def scrape_all():
         if not_done:
             logging.critical(f"--- TIMEOUT: {len(not_done)} scrape jobs did not complete in 300s. ---")
             for future in not_done:
-                # We can't get a result, so we just log them as 'Timed Out'
-                # A more complex setup could map futures back to source names
                 logging.error("A thread has timed out and will be abandoned.")
-                # We can't easily get the 'name' here, so we'll just log a generic count
                 all_counts["Timed_Out_Jobs"] = all_counts.get("Timed_Out_Jobs", 0) + 1
 
     except Exception as e:
@@ -685,8 +672,6 @@ def scrape_all():
         
     finally:
         # 5. Shut down the executor
-        # This is CRITICAL. wait=False tells the main thread to exit
-        # even if a zombie thread (stuck on driver.quit()) is still running.
         logging.info("Shutting down thread pool (wait=False)...")
         executor.shutdown(wait=False)
         
@@ -703,12 +688,8 @@ def scrape_all():
 # --- main() function with cleanup ---
 def main():
     """
-    Main function to run the scraper immediately and then schedule it.
+    Main function to run the scraper once.
     Includes robust error handling and DB connection closing.
-    
-    --- UPDATED FOR GITHUB ACTIONS ---
-    This function no longer schedules or loops. It runs 
-    scrape_all() exactly once and then exits.
     """
     global conn # Make connection global to be accessible in finally
     
@@ -729,9 +710,7 @@ def main():
             print("Scraper stopped and database connection closed.")
         
         # --- NEW: ADDED "KILL SWITCH" ---
-        # This is the 100% guaranteed way to terminate the process
-        # in a CI environment if a zombie thread is still running.
-        # We do this *after* the database is closed and logs are written.
+        # Forces process exit to kill zombie threads (especially for Selenium)
         logging.info("--- Main thread finished. Forcing process exit to kill zombie threads. ---")
         os._exit(0) # 0 = successful exit
 

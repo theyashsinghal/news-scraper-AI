@@ -15,8 +15,8 @@ MAX_ARTICLES_PER_SOURCE = 20
 # This single URL can be a static proxy or a gateway for a rotating proxy service.
 #
 PROXY_SETTINGS = {
-    "use_proxies": False,
-    "proxy_url": None  # e.g., "http://user:pass@proxy.service.com:8080"
+    "use_proxies": False,
+    "proxy_url": None  # e.g., "http://user:pass@proxy.service.com:8080"
 }
 # ==============================================================================
 

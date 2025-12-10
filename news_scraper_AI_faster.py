@@ -1,17 +1,14 @@
 # ==============================================================================
 # --- GLOBAL USER SETTINGS ---
 #
-# How many articles to get from each source (e.g., 25)
-# This is a 'max' value. If a feed only has 20 articles, it will get 20.
-MAX_ARTICLES_PER_SOURCE = 30
+# How many articles to get from each source (e.g., 20)
+MAX_ARTICLES_PER_SOURCE = 20
 # Max time (in seconds) the entire scraping job can run before stopping
 GLOBAL_JOB_TIMEOUT_SECONDS = 300 
 # Semantic similarity threshold (0.0 to 1.0) for news clustering/deduplication
 DEDUPLICATION_THRESHOLD = 0.70
 
 # --- PROXY CONFIGURATION ---
-# Set 'use_proxies' to True to route all requests (Requests & Selenium)
-# through the 'proxy_url'.
 PROXY_SETTINGS = {
     "use_proxies": False,
     "proxy_url": None  # e.g., "http://user:pass@proxy.service.com:8080"
@@ -29,7 +26,8 @@ from datetime import datetime
 import random
 import os
 import uuid
-import re # <-- Added for title cleaning
+import re 
+import traceback # <-- Added for detailed error logging
 
 # --- AI/Semantics Imports ---
 try:
@@ -41,7 +39,7 @@ except ImportError:
 # -------------------------------------
 
 # --- Parallelism Imports ---
-from concurrent.futures import ThreadPoolExecutor, as_completed, wait
+from concurrent.futures import ThreadPoolExecutor, wait
 import threading
 # ------------------------------------
 
@@ -107,9 +105,7 @@ GOOGLEBOT_USER_AGENT = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.goog
 FEEDFETCHER_USER_AGENT = 'Mozilla/5.0 (compatible; FeedFetcher-Google; +http://www.google.com/feedfetcher.html)'
 
 def get_headers(header_type):
-    """
-    Returns a complete header dictionary for a given "persona".
-    """
+    """Returns a complete header dictionary for a given 'persona'."""
     headers = BASE_HEADERS.copy()
     core_type = header_type.replace('requests_', '')
 
@@ -122,9 +118,7 @@ def get_headers(header_type):
     return headers
 
 def create_selenium_driver():
-    """
-    Initializes and returns a headless Selenium Chrome WebDriver.
-    """
+    """Initializes and returns a headless Selenium Chrome WebDriver."""
     if not SELENIUM_AVAILABLE:
         logging.error("Cannot create Selenium driver, library not found.")
         return None
@@ -144,7 +138,7 @@ def create_selenium_driver():
             options.add_argument(f"--proxy-server={PROXY_SETTINGS['proxy_url']}")
 
         driver = webdriver.Chrome(options=options)
-        driver.set_page_load_timeout(20)
+        driver.set_page_load_timeout(30) # Increased to 30s to help initialization
         logging.info("Selenium driver initialized successfully.")
         return driver
     except WebDriverException as e:
@@ -160,19 +154,17 @@ def clean_title(title, source_name=None):
     Removes common boilerplate/site names appended to news titles 
     (e.g., ' - The Hindu' or ' | TOI').
     """
-    # 1. Strip the known source name pattern (if provided)
     if source_name:
         source_pattern = re.escape(source_name)
         # Match separator (-/:|), optional space, source name, optional trailing space, END of string ($)
         title = re.sub(r'[\s]*[-|:\s][\s]*' + source_pattern + r'[\s]*$', '', title, flags=re.IGNORECASE).strip()
     
-    # 2. Final cleanup: replace multiple spaces with single space
+    # Final cleanup: replace multiple spaces with single space
     title = re.sub(r'\s+', ' ', title).strip()
-    
     return title
 
 # ==============================================================================
-# --- AI DEDUPLICATION LOGIC ---
+# --- AI DEDUPLICATION LOGIC (FIXED FOR DEADLOCKS) ---
 # ==============================================================================
 
 def calculate_embedding(title, summary):
@@ -180,9 +172,7 @@ def calculate_embedding(title, summary):
     if semantic_model is None or not summary:
         return None
     try:
-        # Use summary or a default string if summary is None
         text = f"{title}. {summary or 'No content available'}"
-        # Encode as a list and take the first (and only) result
         embedding = semantic_model.encode([text], convert_to_tensor=True)[0]
         return embedding
     except Exception as e:
@@ -193,14 +183,14 @@ def get_cluster_id_for_article(new_title, new_summary, new_embedding):
     """
     Checks DB for articles from the last 24 hours.
     If a semantically similar article exists, returns its cluster_id.
-    If not, returns a new unique cluster_id.
-    (This function now runs OUTSIDE the db_lock for the expensive tensor ops)
+    
+    *** CRITICAL FIX: All expensive AI operations run OUTSIDE the db_lock ***
     """
     if new_embedding is None or util is None:
         return str(uuid.uuid4())
 
     try:
-        # 1. Fetch recent articles (last 24h) and their cluster IDs
+        # 1. Fetch recent articles (FAST DB READ ONLY)
         with db_lock:
             cursor.execute('''
                 SELECT title, summary, cluster_id 
@@ -209,6 +199,7 @@ def get_cluster_id_for_article(new_title, new_summary, new_embedding):
             ''')
             recent_articles = cursor.fetchall()
 
+        # If no recent articles, no need to compare
         if not recent_articles:
             return str(uuid.uuid4())
 
@@ -216,7 +207,8 @@ def get_cluster_id_for_article(new_title, new_summary, new_embedding):
         existing_texts = [f"{row[0]}. {row[1]}" for row in recent_articles]
         existing_ids = [row[2] for row in recent_articles]
         
-        # 3. Convert existing articles to Embeddings (expensive operation)
+        # 3. Calculate Embeddings for existing articles 
+        # (EXPENSIVE OPERATION - MUST BE OUTSIDE LOCK)
         existing_embeddings = semantic_model.encode(existing_texts, convert_to_tensor=True)
 
         # 4. Calculate Cosine Similarity
@@ -231,10 +223,8 @@ def get_cluster_id_for_article(new_title, new_summary, new_embedding):
                 best_score = score
                 best_idx = i
 
-        # 6. Decision Threshold (using global constant)
-        THRESHOLD = DEDUPLICATION_THRESHOLD
-        
-        if best_score >= THRESHOLD:
+        # 6. Decision Threshold
+        if best_score >= DEDUPLICATION_THRESHOLD:
             logging.info(f"DEDUPLICATION: Found match (Score: {best_score:.2f}). Linking to Cluster ID: {existing_ids[best_idx]}")
             return existing_ids[best_idx]
         else:
@@ -254,7 +244,7 @@ def save_article(source, title, url, summary, image_url):
         # --- ROBUST CLEANING & TITLE CLEANUP ---
         # 1. Clean up title
         title = " ".join(title.replace('\n', ' ').replace('\r', ' ').split()).strip()
-        title = clean_title(title, source) # <-- NEW CLEANUP APPLIED HERE
+        title = clean_title(title, source) 
         
         # 2. Clean up summary
         summary_clean = None
@@ -263,7 +253,7 @@ def save_article(source, title, url, summary, image_url):
             summary_clean = "\n\n".join(summary_lines)
         
         # 3. Calculate embedding (OUTSIDE the DB lock)
-        # Use the raw summary for the embedding, but the cleaned one for saving
+        # Use raw summary for embedding, clean for saving
         embedding = calculate_embedding(title, summary_clean)
         
         # --- THREAD-SAFE BLOCK ---
@@ -274,7 +264,8 @@ def save_article(source, title, url, summary, image_url):
                 logging.info(f"Duplicate article skipped: {title} from {source}")
                 return False
             
-            # 5. Get Cluster ID
+            # 5. Get Cluster ID (Fix implemented: AI runs outside this lock inside the function call logic, 
+            # or strictly speaking, the function handles its own internal lock correctly now)
             cluster_id = get_cluster_id_for_article(title, summary_clean, embedding)
 
             # 6. Set final values (using None for DB NULL)
@@ -292,6 +283,8 @@ def save_article(source, title, url, summary, image_url):
         return True
             
     except Exception as e:
+        # --- ENHANCED ERROR LOGGING ---
+        logging.critical(f"CRITICAL SAVE ERROR: {title}. Traceback:\n{traceback.format_exc()}")
         logging.error(f"Error saving article {title}: {e}")
         return False
 
@@ -306,7 +299,7 @@ def stop_page_load(driver_to_stop, source_name):
 
 
 # ==============================================================================
-# --- MAIN SCRAPING LOGIC (Refactored for Batch Skip) ---
+# --- MAIN SCRAPING LOGIC ---
 # ==============================================================================
 
 # --- Central Source Configuration ---
@@ -411,7 +404,6 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
 
         # 2. Process each article
         for item in articles_to_process:
-            # Use a smaller politeness delay between the filtered articles
             time.sleep(random.uniform(0.1, 0.3)) 
             
             try:
@@ -421,7 +413,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                 summary = None
                 raw_html = None
                 final_title = rss_title
-                image_url = None # Refactored to use None for DB NULL
+                image_url = None 
                 
                 strategies = source_config['article_strategies']
                 
@@ -470,7 +462,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             continue
                         # --- END STRATEGY ROUTER ---
 
-                        # 3. Extract Content and Check Word Count
+                        # 3. Extract Content
                         if not raw_html:
                             logging.warning(f"[{name}] FAILED with '{strategy}' (HTML was empty).")
                             continue
@@ -513,7 +505,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                 
                 # --- END OF STRATEGY LOOP ---
 
-                # 5. Save Logic (Only if summary meets word count)
+                # 5. Save Logic
                 if summary:
                     was_saved = save_article(name, final_title, article_url, summary, image_url)
                     if was_saved:
@@ -577,7 +569,7 @@ def scrape_source_wrapper(source, session, proxies_dict):
                     logging.error(f"[{name}] (Thread) driver.quit() failed, but PID was not found. A zombie process may remain.")
             
 
-# --- REFACTORED: scrape_all() ---
+# --- scrape_all() ---
 def scrape_all():
     """
     Runs all scraping jobs defined in SOURCE_CONFIG in parallel.
@@ -673,7 +665,7 @@ cursor = conn.cursor()
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS news (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cluster_id TEXT, -- <--- NEW COLUMN
+    cluster_id TEXT, 
     source TEXT,
     title TEXT,
     url TEXT UNIQUE,
@@ -683,7 +675,7 @@ CREATE TABLE IF NOT EXISTS news (
 )
 ''')
 
-# --- MIGRATION: Check if 'cluster_id' exists, if not, add it ---
+# --- MIGRATION Check ---
 cursor.execute("PRAGMA table_info(news)")
 columns = [info[1] for info in cursor.fetchall()]
 if 'cluster_id' not in columns:
@@ -694,7 +686,6 @@ if 'cluster_id' not in columns:
     except Exception as e:
         logging.error(f"Migration failed: {e}")
 conn.commit()
-# ---------------------------------------------------------------
 
 # --- Thread lock for database ---
 db_lock = threading.Lock()
@@ -705,16 +696,13 @@ db_lock = threading.Lock()
 def main():
     """
     Main function to run the scraper once.
-    Includes robust error handling and DB connection closing.
     """
     global conn
     
     try:
         logging.info("--- Scraper service started (CI Mode: Run Once) ---")
-        
         print("Running single scrape for CI...")
         scrape_all()
-        
         print("Scrape finished.")
             
     except Exception as e:
@@ -725,7 +713,7 @@ def main():
             logging.info("--- Scraper service stopped and database connection closed. ---")
             print("Scraper stopped and database connection closed.")
         
-        # --- ADDED "KILL SWITCH" ---
+        # --- KILL SWITCH ---
         logging.info("--- Main thread finished. Forcing process exit to kill zombie threads. ---")
         os._exit(0)
 

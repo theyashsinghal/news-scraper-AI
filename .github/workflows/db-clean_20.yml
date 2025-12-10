@@ -1,4 +1,22 @@
-- name: 2. Find Database Table Name
+name: 🧹 Cleanup Test Data Delete Last 20 Articles
+
+on:
+  workflow_dispatch:
+    # Allows manual triggering from the 'Actions' tab in GitHub
+
+jobs:
+  cleanup_articles:
+    runs-on: ubuntu-latest
+    
+    # CRITICAL: This permission is required to commit the modified DB file back
+    permissions:
+      contents: write 
+      
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: 2. Find Database Table Name
         run: |
           DB_FILE="news_articles.db" 
           
@@ -16,3 +34,21 @@
           
           # We'll exit now so you can check the logs
           exit 0
+          
+      - name: 3. Commit and Push Modified DB File
+        # Makes the change permanent in your repository
+        run: |
+          DB_PATH="news_articles.db"
+          
+          if git status --porcelain | grep "$DB_PATH"; then
+            echo "Changes detected in $DB_PATH. Committing and pushing..."
+            git config user.name "GitHub Actions Bot"
+            git config user.email "actions@github.com"
+            git add "$DB_PATH"
+            # [skip ci] prevents this commit from triggering other workflows
+            git commit -m "chore(data): Deleted last 20 articles for testing purposes [skip ci]"
+            git push
+            echo "✅ Successfully updated the database in the repository."
+          else
+            echo "No change detected in $DB_PATH. Nothing to commit."
+          fi

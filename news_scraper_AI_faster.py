@@ -8,18 +8,13 @@ MAX_ARTICLES_PER_SOURCE = 20
 # --- NEW: PROXY CONFIGURATION ---
 # Set 'use_proxies' to True to route all requests (Requests & Selenium)
 # through the 'proxy_url'.
-#
 # This is the "at any cost" solution for IP bans.
-#
 # 'proxy_url' should be in the format: http://username:password@proxy.example.com:8080
 # This single URL can be a static proxy or a gateway for a rotating proxy service.
-#
 PROXY_SETTINGS = {
     "use_proxies": False,
-    "proxy_url": None  # e.g., "http://user:pass@proxy.service.com:8080"
+    "proxy_url": None
 }
-# ==============================================================================
-
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry

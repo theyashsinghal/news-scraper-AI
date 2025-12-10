@@ -16,24 +16,34 @@ jobs:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
         
-      - name: 2. Find Database Table Name
+      - name: 2. Execute SQLite Deletion Command (FINAL FIX)
         run: |
           DB_FILE="news_articles.db" 
           
-          echo "Querying database schema to find table name..."
+          if [ ! -f "$DB_FILE" ]; then
+              echo "ERROR: Database file not found at $DB_FILE."
+              exit 1
+          fi
+
+          echo "Attempting to delete the last 20 articles from $DB_FILE (Table: news)..."
           
-          # This command lists all tables in the database
-          TABLE_NAMES=$(sqlite3 "$DB_FILE" ".tables")
-          
-          echo "Found tables in $DB_FILE:"
-          echo "$TABLE_NAMES"
-          
-          # You should see the name of your articles table printed in the log.
-          # For example, if it prints: news_items
-          # The correct table name is news_items
-          
-          # We'll exit now so you can check the logs
-          exit 0
+          # The table name is now correctly set to 'news'
+          # NOTE: Assuming your timestamp column is named 'created_at' and ID is 'id'
+          sqlite3 "$DB_FILE" "
+              DELETE FROM news 
+              WHERE id IN (
+                  SELECT id 
+                  FROM news 
+                  ORDER BY created_at DESC 
+                  LIMIT 20
+              );
+          "
+
+          if [ $? -ne 0 ]; then
+              echo "Error running SQLite command. Please double-check the column names (id, created_at)."
+              exit 1
+          fi
+          echo "✅ Successfully executed SQLite deletion command."
           
       - name: 3. Commit and Push Modified DB File
         # Makes the change permanent in your repository

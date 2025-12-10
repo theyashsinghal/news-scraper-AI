@@ -3,9 +3,9 @@
 #
 # How many articles to get from each source (e.g., 25)
 # This is a 'max' value. If a feed only has 20 articles, it will get 20.
-MAX_ARTICLES_PER_SOURCE = 20
+MAX_ARTICLES_PER_SOURCE = 30
 # Max time (in seconds) the entire scraping job can run before stopping
-GLOBAL_JOB_TIMEOUT_SECONDS = 180 
+GLOBAL_JOB_TIMEOUT_SECONDS = 300 
 # Semantic similarity threshold (0.0 to 1.0) for news clustering/deduplication
 DEDUPLICATION_THRESHOLD = 0.70
 

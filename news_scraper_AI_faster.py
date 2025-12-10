@@ -410,7 +410,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     try:
         # 1. Get RSS Feed (15s Timeout)
         rss_headers = get_headers(source_config['rss_headers_type'])
-        response = session.get(rss_url, headers=rss_headers, timeout=15, proxies=proxies_dict) # <--- 15s Timeout
+        response = session.get(rss_url, headers=rss_headers, timeout=20, proxies=proxies_dict) # <--- 15s Timeout
         response.raise_for_status() # Will raise an error for 4xx/5xx
         
         soup = BeautifulSoup(response.content, 'xml')
@@ -464,7 +464,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             article_headers = get_headers(header_type)
                             article_headers['Referer'] = source_config['referer']
                             
-                            page_response = session.get(article_url, headers=article_headers, timeout=15, proxies=proxies_dict) # <--- 15s Timeout
+                            page_response = session.get(article_url, headers=article_headers, timeout=20, proxies=proxies_dict) # <--- 15s Timeout
                             page_response.raise_for_status()
                             raw_html = page_response.text
                         
@@ -638,7 +638,7 @@ def scrape_source_wrapper(source, session, proxies_dict):
 def scrape_all():
     """
     Runs all scraping jobs defined in SOURCE_CONFIG in parallel.
-    Implements a 5-minute (300s) timeout for the entire job.
+    Implements a 5-minute (180s) timeout for the entire job.
     """
     logging.info("--- Starting new scraping job (Parallel Mode) ---")
     
@@ -669,10 +669,10 @@ def scrape_all():
             future = executor.submit(scrape_source_wrapper, source, session, proxies_dict)
             futures.append(future)
 
-        logging.info(f"Submitted {len(futures)} jobs to thread pool. Waiting up to 300s for completion...")
+        logging.info(f"Submitted {len(futures)} jobs to thread pool. Waiting up to 180s for completion...")
         
-        # 2. Wait for jobs to complete, with a 5-minute (300s) timeout
-        done, not_done = wait(futures, timeout=300)
+        # 2. Wait for jobs to complete, with a 5-minute (180s) timeout
+        done, not_done = wait(futures, timeout=180)
 
         # 3. Process completed jobs
         for future in done:
@@ -685,7 +685,7 @@ def scrape_all():
         
         # 4. Handle jobs that timed out
         if not_done:
-            logging.critical(f"--- TIMEOUT: {len(not_done)} scrape jobs did not complete in 300s. ---")
+            logging.critical(f"--- TIMEOUT: {len(not_done)} scrape jobs did not complete in 180s. ---")
             for future in not_done:
                 logging.error("A thread has timed out and will be abandoned.")
                 all_counts["Timed_Out_Jobs"] = all_counts.get("Timed_Out_Jobs", 0) + 1

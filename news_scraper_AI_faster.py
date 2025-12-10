@@ -3,7 +3,7 @@
 #
 # How many articles to get from each source (e.g., 25)
 # This is a 'max' value. If a feed only has 20 articles, it will get 20.
-MAX_ARTICLES_PER_SOURCE = 25
+MAX_ARTICLES_PER_SOURCE = 20
 #
 # --- NEW: PROXY CONFIGURATION ---
 # Set 'use_proxies' to True to route all requests (Requests & Selenium)
@@ -170,8 +170,6 @@ def create_selenium_driver():
         return None
 
 # --- UPDATED: Central Source Configuration (Multi-Strategy Implemented) ---
-# Strategies now include 'requests_browser' as the primary option for TOI and The Hindu
-#
 SOURCE_CONFIG = [
     {
         'name': 'BBC',
@@ -344,8 +342,11 @@ def save_article(source, title, url, summary, image_url):
             summary_lines = [line.strip() for line in summary.splitlines() if line.strip()]
             summary = "\n\n".join(summary_lines)
         
+        # Note: We rely on the calling function (scrape_source) to ensure summary is >= 80 words.
+        # If it reaches here, the data is good.
+        
         if not summary:
-            summary = "No content available"
+            summary = "No content available" # Should not happen with new logic
             
         if not image_url:
             image_url = "No image available"
@@ -396,8 +397,8 @@ def stop_page_load(driver_to_stop, source_name):
 def scrape_source(session, selenium_driver, source_config, proxies_dict):
     """
     A generic function that scrapes any source based on its config.
-    It will try every strategy in `article_strategies` to get the full text
-    before falling back to the RSS summary.
+    It will try every strategy in `article_strategies` to get the full text.
+    If the resulting content is less than 80 words, the article is skipped.
     """
     name = source_config['name']
     rss_url = source_config['rss_url']
@@ -441,7 +442,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
 
                 rss_title = item.title.text if item.title else "Title not found"
                 
-                # --- NEW MULTI-STRATEGY LOGIC ---
+                # --- MULTI-STRATEGY EXECUTION ---
                 summary = None
                 raw_html = None
                 final_title = rss_title # Default to RSS title
@@ -453,8 +454,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     logging.info(f"[{name}] Article: {article_url}")
                     logging.info(f"[{name}] Attempt {i+1}/{len(strategies)}: Trying with '{strategy}' strategy...")
                     
-                    # Reset HTML for new strategy attempt
-                    raw_html = None
+                    raw_html = None # Reset HTML for new strategy attempt
 
                     try:
                         # --- STRATEGY ROUTER ---
@@ -506,13 +506,14 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             continue
                         # --- END STRATEGY ROUTER ---
 
-                        # 4. Extract Content
+                        # 4. Extract Content and Check Word Count
                         if not raw_html:
                             logging.warning(f"[{name}] FAILED with '{strategy}' (HTML was empty).")
                             continue # Try next strategy
 
                         temp_summary = None
                         try:
+                            # Attempt to clean and extract content
                             temp_summary = trafilatura.extract(raw_html, include_comments=False, include_tables=False)
                         except Exception as e:
                             logging.error(f"[{name}] trafilatura failed to parse HTML: {e}")
@@ -522,11 +523,11 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             word_count = len(temp_summary.split())
                         
                         if word_count >= 80:
-                        # ---------------------------
+                            # --- SUCCESS: Content meets quality bar ---
                             logging.info(f"[{name}] Success with '{strategy}'. Found content ({word_count} words).")
                             summary = temp_summary
                             
-                            # Parse metadata
+                            # Parse metadata (only needed on the successful scrape)
                             soup = BeautifulSoup(raw_html, 'html.parser')
                             page_title = soup.find('title')
                             if page_title:
@@ -536,7 +537,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             if og_image:
                                 image_url = og_image['content']
                             
-                            break # <-- Success! Exit the strategy loop.
+                            break # <-- Success! Exit the strategy loop and proceed to save.
                         else:
                             logging.warning(f"[{name}] FAILED with '{strategy}' (content was too short: {word_count} words).")
                     
@@ -550,17 +551,14 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                 
                 # --- END OF STRATEGY LOOP ---
 
-                # 5. Fallback Logic
+                # 5. STRICT FALLBACK/SKIP LOGIC (NEW REQUIREMENT)
                 if not summary:
-                    logging.error(f"[{name}] All scrape strategies failed for {article_url}. Falling back to RSS description.")
-                    if item.description:
-                        # Use BeautifulSoup to strip any HTML from the RSS description
-                        summary_soup = BeautifulSoup(item.description.text, 'html.parser')
-                        summary = summary_soup.get_text().strip()
-                    else:
-                        summary = "No content available"
-
+                    # 'summary' is only set if word_count >= 80 in the loop above.
+                    logging.warning(f"[{name}] Discarding article {rss_title}. Did not meet minimum content quality (80 words).")
+                    continue # Skip saving this article entirely
+                
                 # 6. Save (The save_article function runs the final URL duplicate check again)
+                # If we reach here, 'summary' contains valid content >= 80 words.
                 was_saved = save_article(name, final_title, article_url, summary, image_url)
                 if was_saved:
                     articles_saved_list.append(final_title)

@@ -130,7 +130,7 @@ def get_headers(header_type):
         headers = {'User-Agent': FEEDFETCHER_USER_AGENT}
     return headers
 
-# --- UPDATED: Selenium WebDriver Setup (Page Load Timeout 15s) ---
+# --- UPDATED: Selenium WebDriver Setup (Page Load Timeout 20s) ---
 def create_selenium_driver():
     """
     Initializes and returns a headless Selenium Chrome WebDriver.
@@ -157,8 +157,8 @@ def create_selenium_driver():
 
         driver = webdriver.Chrome(options=options)
         
-        # --- MODIFIED: Reduce page load timeout to 15 seconds ---
-        driver.set_page_load_timeout(15)  # 15 second page load timeout
+        # --- MODIFIED: Reduce page load timeout to 20 seconds ---
+        driver.set_page_load_timeout(20)  # 20 second page load timeout
         logging.info("Selenium driver initialized successfully.")
         return driver
     except WebDriverException as e:
@@ -385,7 +385,7 @@ def save_article(source, title, url, summary, image_url):
 # --- NEW: Timer function to kill the Selenium load if it hangs ---
 def stop_page_load(driver_to_stop, source_name):
     """Callback function to stop a hung page load after the timer expires."""
-    logging.warning(f"[{source_name}] [FORCED TIMEOUT] Page load exceeded 15s. Stopping browser script execution.")
+    logging.warning(f"[{source_name}] [FORCED TIMEOUT] Page load exceeded 20s. Stopping browser script execution.")
     try:
         # Use execute_script to force the browser to stop loading the page
         driver_to_stop.execute_script("window.stop();")
@@ -408,9 +408,9 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     logging.info(f"Starting scrape for {name} RSS feed: {rss_url}")
     
     try:
-        # 1. Get RSS Feed (15s Timeout)
+        # 1. Get RSS Feed (20s Timeout)
         rss_headers = get_headers(source_config['rss_headers_type'])
-        response = session.get(rss_url, headers=rss_headers, timeout=20, proxies=proxies_dict) # <--- 15s Timeout
+        response = session.get(rss_url, headers=rss_headers, timeout=20, proxies=proxies_dict) # <--- 20s Timeout
         response.raise_for_status() # Will raise an error for 4xx/5xx
         
         soup = BeautifulSoup(response.content, 'xml')
@@ -459,23 +459,23 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     try:
                         # --- STRATEGY ROUTER ---
                         if strategy.startswith('requests_'):
-                            # 3. Download Article Page with REQUESTS (15s Timeout)
+                            # 3. Download Article Page with REQUESTS (20s Timeout)
                             header_type = strategy.replace('requests_', '')
                             article_headers = get_headers(header_type)
                             article_headers['Referer'] = source_config['referer']
                             
-                            page_response = session.get(article_url, headers=article_headers, timeout=20, proxies=proxies_dict) # <--- 15s Timeout
+                            page_response = session.get(article_url, headers=article_headers, timeout=20, proxies=proxies_dict) # <--- 20s Timeout
                             page_response.raise_for_status()
                             raw_html = page_response.text
                         
                         elif strategy == 'selenium_browser':
-                            # 3. Download Article Page with SELENIUM (Hard 15s Timeout)
+                            # 3. Download Article Page with SELENIUM (Hard 20s Timeout)
                             if not selenium_driver:
                                 logging.error(f"[{name}] Selenium strategy selected but driver is not available. Skipping.")
                                 continue # Try next strategy
                             
-                            # --- NEW: 15s Timer for Hard Timeout ---
-                            timeout_seconds = 15
+                            # --- NEW: 20s Timer for Hard Timeout ---
+                            timeout_seconds = 20
                             timer = threading.Timer(timeout_seconds, stop_page_load, args=[selenium_driver, name])
                             timer.start()
                             
@@ -495,7 +495,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                                 raw_html = selenium_driver.page_source
                             
                             except (TimeoutException, WebDriverException) as e:
-                                # This catches the 15s forced stop or any connection/wait errors
+                                # This catches the 20s forced stop or any connection/wait errors
                                 if timer.is_alive():
                                     timer.cancel()
                                 logging.error(f"[{name}] Request failed for strategy '{strategy}' on URL {article_url}: Timed out or failed. {e}")

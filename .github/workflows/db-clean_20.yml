@@ -16,23 +16,33 @@ jobs:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
         
-      - name: 2. Find Table Schema
+      - name: 2. Execute SQLite Deletion Command (FINAL FIX)
         run: |
           DB_FILE="news_articles.db" 
           
-          echo "Querying schema for the 'news' table..."
+          if [ ! -f "$DB_FILE" ]; then
+              echo "ERROR: Database file not found at $DB_FILE."
+              exit 1
+          fi
+
+          echo "Attempting to delete the last 20 articles from $DB_FILE (Table: news)..."
           
-          # This command prints the column details for the 'news' table
-          SCHEMA_DETAILS=$(sqlite3 "$DB_FILE" ".schema news")
-          
-          echo "Schema for 'news' table:"
-          echo "$SCHEMA_DETAILS"
-          
-          # You will see a line starting with: CREATE TABLE news ( ... )
-          # This will list all the column names, including the one you use for the timestamp.
-          
-          # We'll exit now so you can check the logs
-          exit 0
+          # The table name is 'news' and the timestamp column is 'scraped_at'.
+          sqlite3 "$DB_FILE" "
+              DELETE FROM news 
+              WHERE id IN (
+                  SELECT id 
+                  FROM news 
+                  ORDER BY scraped_at DESC 
+                  LIMIT 20
+              );
+          "
+
+          if [ $? -ne 0 ]; then
+              echo "Error running SQLite command. Check the database file integrity."
+              exit 1
+          fi
+          echo "✅ Successfully executed SQLite deletion command."
           
       - name: 3. Commit and Push Modified DB File
         # Makes the change permanent in your repository

@@ -171,6 +171,14 @@ SOURCE_CONFIG = [
         'article_strategies': ['selenium_browser'],
         'article_url_contains': None,
         'referer': 'https://www.thehindu.com/',
+    },
+    {
+        'name': 'Al Jazeera',
+        'rss_url': 'https://www.aljazeera.com/xml/rss/all.xml',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser', 'selenium_browser'], 
+        'article_url_contains': None,
+        'referer': 'https://www.aljazeera.com/',
     }
 ]
 

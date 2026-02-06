@@ -4,7 +4,7 @@
 # How many articles to get from each source (e.g., 5)
 # This is a 'quota'. The script will keep scanning the feed until it saves
 # this many NEW articles (or runs out of items).
-MAX_ARTICLES_PER_SOURCE = 100
+MAX_ARTICLES_PER_SOURCE = 30
 #
 # --- NEW: PROXY CONFIGURATION ---
 # Set 'use_proxies' to True to route all requests (Requests & Selenium)

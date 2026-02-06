@@ -1,9 +1,10 @@
 # ==============================================================================
 # --- GLOBAL USER SETTINGS ---
 #
-# How many articles to get from each source (e.g., 25)
-# This is a 'max' value. If a feed only has 20 articles, it will get 20.
-MAX_ARTICLES_PER_SOURCE = 30
+# How many articles to get from each source (e.g., 5)
+# This is a 'quota'. The script will keep scanning the feed until it saves
+# this many NEW articles (or runs out of items).
+MAX_ARTICLES_PER_SOURCE = 40
 #
 # --- NEW: PROXY CONFIGURATION ---
 # Set 'use_proxies' to True to route all requests (Requests & Selenium)
@@ -179,8 +180,9 @@ SOURCE_CONFIG = [
 semantic_model = None
 if SentenceTransformer is not None:
     try:
-        logging.info("Loading AI Semantic Model (all-MiniLM-L6-v2)...")
-        semantic_model = SentenceTransformer('all-MiniLM-L6-v2')
+        # CHANGED (from App1): Switched to L4 model
+        logging.info("Loading AI Semantic Model (all-MiniLM-L4-v2)...")
+        semantic_model = SentenceTransformer('all-MiniLM-L4-v2')
         logging.info("AI Model loaded successfully.")
     except Exception as e:
         logging.critical(f"Failed to load AI model: {e}. Clustering is disabled.")
@@ -230,21 +232,29 @@ def get_cluster_id_for_article(new_title, new_summary):
         return str(uuid.uuid4())
 
     try:
-        # Fetch recent articles (last 24h)
+        # --- CHANGED (from App1): Reverted to 15-day memory check ---
+        # Fetch recent articles (last 15 day)
         cursor.execute('''
             SELECT title, summary, cluster_id 
             FROM news 
-            WHERE scraped_at >= datetime('now', '-1 day')
+            WHERE scraped_at >= datetime('now', '-15 day')
         ''')
+        # ------------------------------------------------
         recent_articles = cursor.fetchall()
 
         if not recent_articles:
             return str(uuid.uuid4())
 
-        # Prepare data and convert to Embeddings
-        existing_texts = [f"{row[0]}. {row[1]}" for row in recent_articles]
+        # CHANGED (from App1): Truncate to approx 350 words.
+        # 350 words is roughly 2000-2200 characters. Using 2000 as a safe, fast limit.
+        limit_chars = 2000
+
+        # Prepare data and convert to Embeddings with truncation
+        existing_texts = [f"{row[0]}. {row[1][:limit_chars]}" for row in recent_articles]
         existing_ids = [row[2] for row in recent_articles]
-        new_text = f"{new_title}. {new_summary}"
+        
+        # Same for the new text
+        new_text = f"{new_title}. {new_summary[:limit_chars]}"
 
         existing_embeddings = semantic_model.encode(existing_texts, convert_to_tensor=True)
         new_embedding = semantic_model.encode(new_text, convert_to_tensor=True)
@@ -284,6 +294,7 @@ def save_article(source, title, url, summary, image_url):
         final_word_count = 0
     else:
         # Robustly calculate word count after initial cleanup
+        # KEPT APP2 "FLAT" STRUCTURE HERE
         cleaned_summary = " ".join(summary.replace('\n', ' ').replace('\r', ' ').split()).strip()
         final_word_count = len(cleaned_summary.split())
 
@@ -353,10 +364,17 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
         
         soup = BeautifulSoup(response.content, 'xml')
         items = soup.find_all('item')
-        logging.info(f"Found {len(items)} articles in {name} RSS feed. Processing up to {MAX_ARTICLES_PER_SOURCE}.")
+        logging.info(f"Found {len(items)} articles in {name} RSS feed. Processing until {MAX_ARTICLES_PER_SOURCE} new articles are saved.")
 
         # 2. Process each article
-        for item in items[:MAX_ARTICLES_PER_SOURCE]:
+        # UPDATED (from App1): Loop through ALL items, not just the first set
+        for item in items:
+            
+            # UPDATED (from App1): Stop processing if we have successfully saved our target quota
+            if len(articles_saved_list) >= MAX_ARTICLES_PER_SOURCE:
+                 logging.info(f"[{name}] Target reached: Successfully saved {MAX_ARTICLES_PER_SOURCE} new articles.")
+                 break
+
             article_url = None
             rss_title = "Title not found"
             rss_description = None
@@ -377,7 +395,8 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     cursor.execute("SELECT id FROM news WHERE url = ?", (article_url,))
                     if cursor.fetchone():
                         logging.info(f"[{name}] Early skip: URL {article_url} already exists.")
-                        time.sleep(random.uniform(0.1, 0.3))
+                        # CHANGED (from App1): Small sleep to prevent CPU spiking
+                        time.sleep(0.001)
                         continue
                 # -------------------------
 
@@ -641,4 +660,4 @@ def main():
         os._exit(0)
 
 if __name__ == '__main__':
-    main()# ==============================================================================
+    main()

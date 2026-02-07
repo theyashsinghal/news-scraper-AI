@@ -227,15 +227,16 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': None,
         'referer': 'https://www.sixthtone.com/',
-    },
-    {
-        'name': 'Reuters',
-        'rss_url': 'https://ir.thomsonreuters.com/rss/news-releases.xml?items=15',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.reuters.com/',
     }
+    # ,
+    # {
+    #     'name': 'Reuters',
+    #     'rss_url': 'https://ir.thomsonreuters.com/rss/news-releases.xml?items=15',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser', 'selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.reuters.com/',
+    # }
 ]
 
 # ==============================================================================

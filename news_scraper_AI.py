@@ -230,7 +230,7 @@ SOURCE_CONFIG = [
     },
     {
         'name': 'Reuters',
-        'rss_url': 'https://news.google.com/rss/search?q=site%3Areuters.com&hl=en-US&gl=US&ceid=US%3Aen',
+        'rss_url': 'https://ir.thomsonreuters.com/rss/news-releases.xml?items=15',
         'rss_headers_type': 'browser',
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': None,

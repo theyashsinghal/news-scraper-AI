@@ -197,6 +197,14 @@ SOURCE_CONFIG = [
         'referer': 'https://techcrunch.com/',
     },
     {
+        'name': 'Economic Times',
+        'rss_url': 'https://economictimes.indiatimes.com/rssfeedsdefault.cms',
+        'rss_headers_type': 'feedfetcher',
+        'article_strategies': ['requests_browser', 'selenium_browser'],
+        'article_url_contains': '.cms',
+        'referer': 'https://economictimes.indiatimes.com/',
+    },
+    {
         'name': 'AP News',
         'rss_url': 'https://newsatme.com/go/ap/rss',
         'rss_headers_type': 'browser',

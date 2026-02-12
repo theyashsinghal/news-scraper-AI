@@ -2,7 +2,7 @@
 # --- GLOBAL USER SETTINGS ---
 #
 # How many articles to get from each source (e.g., 5)
-MAX_ARTICLES_PER_SOURCE = 30
+MAX_ARTICLES_PER_SOURCE = 2
 
 # --- PROXY CONFIGURATION ---
 PROXY_SETTINGS = {

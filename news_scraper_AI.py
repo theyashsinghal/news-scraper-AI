@@ -2,13 +2,9 @@
 # --- GLOBAL USER SETTINGS ---
 #
 # How many articles to get from each source (e.g., 5)
-# This is a 'quota'. The script will keep scanning the feed until it saves
-# this many NEW articles (or runs out of items).
 MAX_ARTICLES_PER_SOURCE = 30
 
 # --- PROXY CONFIGURATION ---
-# Set 'use_proxies' to True to route all requests (Requests & Selenium)
-# through the 'proxy_url'.
 PROXY_SETTINGS = {
     "use_proxies": False,
     "proxy_url": None  # e.g., "http://user:pass@proxy.service.com:8080"
@@ -266,9 +262,13 @@ sheet_lock = threading.Lock() # Locks access to the Google Sheet upload
 existing_urls_cache = set()   # Memory cache for fast deduplication
 recent_articles_cache = []    # Memory cache for AI clustering
 
+# --- NEW: Global Max ID Counter ---
+MAX_ID = 0 
+# ----------------------------------
+
 def init_google_sheets():
     """Initializes connection to Google Sheets and loads existing data into memory."""
-    global sheet, existing_urls_cache, recent_articles_cache
+    global sheet, existing_urls_cache, recent_articles_cache, MAX_ID
     
     try:
         logging.info("Connecting to Google Sheets...")
@@ -310,10 +310,19 @@ def init_google_sheets():
                 # 1. Populate URL cache (Deduplication)
                 if 'url' in article_data:
                     existing_urls_cache.add(article_data['url'])
-                    
+                
+                # --- NEW: Update Max ID ---
+                if 'id' in article_data:
+                    try:
+                        current_id = int(article_data['id'])
+                        if current_id > MAX_ID:
+                            MAX_ID = current_id
+                    except ValueError:
+                        pass
+                # --------------------------
+
                 # 2. Populate AI Cache (Only recent articles)
                 if 'scraped_at' in article_data and 'title' in article_data and 'content' in article_data:
-                    # Handle different date formats if necessary
                     try:
                         scraped_date = datetime.strptime(str(article_data['scraped_at']).split('.')[0], "%Y-%m-%d %H:%M:%S")
                         if scraped_date >= cutoff_date:
@@ -323,13 +332,12 @@ def init_google_sheets():
                                 'cluster_id': article_data.get('cluster_id')
                             })
                     except:
-                        # If date parsing fails, just ignore for AI cache
                         pass
                         
             except json.JSONDecodeError:
                 continue
 
-        logging.info(f"Cache built: {len(existing_urls_cache)} URLs, {len(recent_articles_cache)} recent articles for AI context.")
+        logging.info(f"Cache built: {len(existing_urls_cache)} URLs. Current MAX_ID: {MAX_ID}")
 
     except Exception as e:
         logging.critical(f"Failed to initialize Google Sheets: {e}")
@@ -409,7 +417,7 @@ def save_article(source, title, url, summary, image_url):
     Saves a single article to Google Sheets. 
     INCLUDES: The strict 90-word minimum length check.
     """
-    global existing_urls_cache, recent_articles_cache
+    global existing_urls_cache, recent_articles_cache, MAX_ID
     
     # --- STEP 0: STRICT GLOBAL WORD COUNT CHECK ---
     # Calculates word count on the final summary
@@ -443,8 +451,9 @@ def save_article(source, title, url, summary, image_url):
             # 2. Get Cluster ID
             cluster_id = get_cluster_id_for_article(title, summary)
             
-            # 3. Generate ID (random integer to match previous schema style)
-            article_id = random.randint(100000, 999999)
+            # 3. Generate Sequential ID
+            MAX_ID += 1
+            article_id = MAX_ID
 
             # 4. Create Object
             article_obj = {
@@ -476,7 +485,7 @@ def save_article(source, title, url, summary, image_url):
             time.sleep(1.5)
         # -------------------------
         
-        logging.info(f"Saved article: {title} from {source} ({final_word_count} words)")
+        logging.info(f"Saved article: {title} from {source} ({final_word_count} words) [ID: {article_id}]")
         return True
         
     except Exception as e:
@@ -488,8 +497,6 @@ def save_article(source, title, url, summary, image_url):
 def scrape_source(session, selenium_driver, source_config, proxies_dict):
     """
     A generic function that scrapes any source based on its config.
-    It will try every strategy in `article_strategies` to get the full text
-    before falling back to the RSS summary.
     """
     name = source_config['name']
     rss_url = source_config['rss_url']

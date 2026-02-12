@@ -1,0 +1,27 @@
+name: Run Database Migration
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  migrate_data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Ensures we get the actual .db file stored in the repo
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install gspread oauth2client
+
+      - name: Run Migration Script
+        env:
+          GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+        run: python migrate_to_sheets.py

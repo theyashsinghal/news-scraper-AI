@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor, wait
 import random
 import urllib3
 
-# Suppress insecure request warnings for AP News
+# Suppress insecure request warnings for sites with bad SSL (like China Daily)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- Google Sheets Imports ---
@@ -140,7 +140,7 @@ def create_selenium_driver():
             options.add_argument(f"--proxy-server={PROXY_SETTINGS['proxy_url']}")
 
         driver = webdriver.Chrome(options=options)
-        driver.set_page_load_timeout(25) # Increased slightly
+        driver.set_page_load_timeout(25)
         logging.info("Selenium driver initialized successfully.")
         return driver
     except WebDriverException as e:
@@ -152,103 +152,18 @@ def create_selenium_driver():
 
 # --- Central Source Configuration ---
 SOURCE_CONFIG = [
-    {
-        'name': 'BBC',
-        'rss_url': 'http://feeds.bbci.co.uk/news/world/rss.xml',
-        'rss_headers_type': 'feedfetcher',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.bbc.com/news',
-    },
-    {
-        'name': 'Times of India',
-        'rss_url': 'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms',
-        'rss_headers_type': 'feedfetcher',
-        'article_strategies': ['selenium_browser'],
-        'article_url_contains': '.cms',
-        'referer': 'https://timesofindia.indiatimes.com/',
-    },
-    {
-        'name': 'The Guardian',
-        'rss_url': 'https://www.theguardian.com/world/rss',
-        'rss_headers_type': 'feedfetcher',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.theguardian.com/',
-    },
-    {
-        'name': 'The Hindu',
-        'rss_url': 'https://www.thehindu.com/news/national/feeder/default.rss',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.thehindu.com/',
-    },
-    {
-        'name': 'The Dawn',
-        'rss_url': 'https://www.dawn.com/feeds/home',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.dawn.com/',
-    },
-    {
-        'name': 'Al Jazeera',
-        'rss_url': 'https://www.aljazeera.com/xml/rss/all.xml',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.aljazeera.com/',
-    },
-    {
-        'name': 'TechCrunch',
-        'rss_url': 'https://techcrunch.com/feed/',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://techcrunch.com/',
-    },
-    {
-        'name': 'Economic Times',
-        'rss_url': 'https://economictimes.indiatimes.com/rssfeedsdefault.cms',
-        'rss_headers_type': 'feedfetcher',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': '.cms',
-        'referer': 'https://economictimes.indiatimes.com/',
-    },
-    {
-        'name': 'AP News',
-        'rss_url': 'https://newsatme.com/go/ap/rss',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://apnews.com/',
-        'verify_ssl': False # --- FIX 2: SSL Bypass ---
-    },
-    {
-        'name': 'South China Morning Post',
-        'rss_url': 'https://www.scmp.com/rss/91/feed',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.scmp.com/',
-    },
-    {
-        'name': 'China Daily',
-        'rss_url': 'http://www.chinadaily.com.cn/rss/china_rss.xml',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.chinadaily.com.cn/',
-    },
-    {
-        'name': 'Sixth Tone',
-        'rss_url': 'https://www.sixthtone.com/rss',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.sixthtone.com/',
-    }
+    { 'name': 'BBC', 'rss_url': 'http://feeds.bbci.co.uk/news/world/rss.xml', 'rss_headers_type': 'feedfetcher', 'article_strategies': ['requests_browser'], 'article_url_contains': None, 'referer': 'https://www.bbc.com/news' },
+    { 'name': 'Times of India', 'rss_url': 'https://timesofindia.indiatimes.com/rssfeeds/296589292.cms', 'rss_headers_type': 'feedfetcher', 'article_strategies': ['selenium_browser'], 'article_url_contains': '.cms', 'referer': 'https://timesofindia.indiatimes.com/' },
+    { 'name': 'The Guardian', 'rss_url': 'https://www.theguardian.com/world/rss', 'rss_headers_type': 'feedfetcher', 'article_strategies': ['requests_browser'], 'article_url_contains': None, 'referer': 'https://www.theguardian.com/' },
+    { 'name': 'The Hindu', 'rss_url': 'https://www.thehindu.com/news/national/feeder/default.rss', 'rss_headers_type': 'browser', 'article_strategies': ['selenium_browser'], 'article_url_contains': None, 'referer': 'https://www.thehindu.com/' },
+    { 'name': 'The Dawn', 'rss_url': 'https://www.dawn.com/feeds/home', 'rss_headers_type': 'browser', 'article_strategies': ['requests_browser', 'selenium_browser'], 'article_url_contains': None, 'referer': 'https://www.dawn.com/' },
+    { 'name': 'Al Jazeera', 'rss_url': 'https://www.aljazeera.com/xml/rss/all.xml', 'rss_headers_type': 'browser', 'article_strategies': ['requests_browser', 'selenium_browser'], 'article_url_contains': None, 'referer': 'https://www.aljazeera.com/' },
+    { 'name': 'TechCrunch', 'rss_url': 'https://techcrunch.com/feed/', 'rss_headers_type': 'browser', 'article_strategies': ['requests_browser'], 'article_url_contains': None, 'referer': 'https://techcrunch.com/' },
+    { 'name': 'Economic Times', 'rss_url': 'https://economictimes.indiatimes.com/rssfeedsdefault.cms', 'rss_headers_type': 'feedfetcher', 'article_strategies': ['requests_browser', 'selenium_browser'], 'article_url_contains': '.cms', 'referer': 'https://economictimes.indiatimes.com/' },
+    { 'name': 'AP News', 'rss_url': 'https://newsatme.com/go/ap/rss', 'rss_headers_type': 'browser', 'article_strategies': ['requests_browser'], 'article_url_contains': None, 'referer': 'https://apnews.com/', 'verify_ssl': False },
+    { 'name': 'South China Morning Post', 'rss_url': 'https://www.scmp.com/rss/91/feed', 'rss_headers_type': 'browser', 'article_strategies': ['requests_browser', 'selenium_browser'], 'article_url_contains': None, 'referer': 'https://www.scmp.com/' },
+    { 'name': 'China Daily', 'rss_url': 'http://www.chinadaily.com.cn/rss/china_rss.xml', 'rss_headers_type': 'browser', 'article_strategies': ['requests_browser'], 'article_url_contains': None, 'referer': 'https://www.chinadaily.com.cn/', 'verify_ssl': False },
+    { 'name': 'Sixth Tone', 'rss_url': 'https://www.sixthtone.com/rss', 'rss_headers_type': 'browser', 'article_strategies': ['requests_browser', 'selenium_browser'], 'article_url_contains': None, 'referer': 'https://www.sixthtone.com/' }
 ]
 
 # ==============================================================================
@@ -262,7 +177,7 @@ if SentenceTransformer is not None:
         semantic_model = SentenceTransformer('all-MiniLM-L4-v2')
         logging.info("AI Model loaded successfully.")
     except Exception as e:
-        logging.warning(f"Failed to load AI model: {e}. Clustering is disabled (Normal in CI/CD environments).")
+        logging.warning(f"Failed to load AI model: {e}. Clustering disabled (Normal in restricted envs).")
         semantic_model = None
 
 
@@ -427,7 +342,7 @@ def get_cluster_id_for_article(new_title, new_summary):
 def save_article(source, title, url, summary, image_url):
     """
     Saves a single article to Google Sheets. 
-    INCLUDES: The strict 90-word minimum length check.
+    INCLUDES: High-Visibility Logging and Verification.
     """
     global existing_urls_cache, recent_articles_cache, MAX_ID
     
@@ -482,9 +397,21 @@ def save_article(source, title, url, summary, image_url):
             # 5. Truncate if needed
             safe_json = truncate_to_fit(article_obj)
             
-            # 6. Upload to Sheet
-            sheet.append_row([safe_json])
-            
+            # 6. Upload to Sheet with Verification
+            try:
+                response = sheet.append_row([safe_json])
+                
+                # --- NEW: VERIFICATION LOGGING ---
+                updated_range = response.get('updates', {}).get('updatedRange', 'Unknown Range')
+                logging.info(f">>> VERIFIED SAVE [ID: {article_id}] to {SHEET_NAME}. Row Range: {updated_range} <<<")
+                # ---------------------------------
+                
+            except Exception as api_error:
+                logging.error(f"!!! CRITICAL GOOGLE API ERROR while saving ID {article_id}: {api_error}")
+                # Revert ID increment since save failed
+                MAX_ID -= 1
+                return False
+
             # 7. Update Caches immediately
             existing_urls_cache.add(url)
             recent_articles_cache.append({
@@ -493,15 +420,15 @@ def save_article(source, title, url, summary, image_url):
                 'cluster_id': cluster_id
             })
             
-            # 8. Sleep briefly to prevent API rate limits
-            time.sleep(1.5)
+            # 8. Sleep MORE to prevent API rate limits (Increased to 2.0s)
+            time.sleep(2.0)
         # -------------------------
         
-        logging.info(f"Saved article: {title} from {source} ({final_word_count} words) [ID: {article_id}]")
+        print(f"Saved: {title} [ID: {article_id}]") # Print to console for immediate feedback
         return True
         
     except Exception as e:
-        logging.error(f"Error saving article {title}: {e}")
+        logging.error(f"Error preparing article {title}: {e}")
         return False
 
 
@@ -512,7 +439,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     """
     name = source_config['name']
     rss_url = source_config['rss_url']
-    verify_ssl = source_config.get('verify_ssl', True) # Default to True
+    verify_ssl = source_config.get('verify_ssl', True) # Default to True if not specified
     
     articles_saved_list = []
     
@@ -581,6 +508,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             article_headers = get_headers(header_type)
                             article_headers['Referer'] = source_config['referer']
                             
+                            # Pass verify_ssl to the request
                             page_response = session.get(article_url, headers=article_headers, timeout=20, proxies=proxies_dict, verify=verify_ssl)
                             page_response.raise_for_status()
                             raw_html = page_response.text

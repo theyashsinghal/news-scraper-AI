@@ -5,16 +5,18 @@
 # This is a 'quota'. The script will keep scanning the feed until it saves
 # this many NEW articles (or runs out of items).
 MAX_ARTICLES_PER_SOURCE = 30
-#
-# --- NEW: PROXY CONFIGURATION ---
+
+# --- PROXY CONFIGURATION ---
 # Set 'use_proxies' to True to route all requests (Requests & Selenium)
 # through the 'proxy_url'.
-#
-# 'proxy_url' should be in the format: http://username:password@proxy.example.com:8080
 PROXY_SETTINGS = {
     "use_proxies": False,
     "proxy_url": None  # e.g., "http://user:pass@proxy.service.com:8080"
 }
+
+# --- GOOGLE SHEETS CONFIGURATION ---
+SHEET_NAME = 'News Scrapper AI'
+WORKSHEET_NAME = 'Sheet1'
 # ==============================================================================
 
 import requests
@@ -24,16 +26,20 @@ from bs4 import BeautifulSoup
 import trafilatura
 import time
 import logging
-import sqlite3
-from datetime import datetime
-import random
+import json
 import os
 import uuid
 import threading
+import sys
+from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, wait
-import sys 
+import random
 
-# --- NEW: Imports for AI/Semantics ---
+# --- Google Sheets Imports ---
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+# --- Imports for AI/Semantics ---
 try:
     from sentence_transformers import SentenceTransformer, util
 except ImportError:
@@ -236,15 +242,6 @@ SOURCE_CONFIG = [
         'article_url_contains': None,
         'referer': 'https://www.sixthtone.com/',
     }
-    # ,
-    # {
-    #     'name': 'Reuters',
-    #     'rss_url': 'https://ir.thomsonreuters.com/rss/news-releases.xml?items=15',
-    #     'rss_headers_type': 'browser',
-    #     'article_strategies': ['requests_browser', 'selenium_browser'],
-    #     'article_url_contains': None,
-    #     'referer': 'https://www.reuters.com/',
-    # }
 ]
 
 # ==============================================================================
@@ -253,7 +250,6 @@ SOURCE_CONFIG = [
 semantic_model = None
 if SentenceTransformer is not None:
     try:
-        # CHANGED (from App1): Switched to L4 model
         logging.info("Loading AI Semantic Model (all-MiniLM-L4-v2)...")
         semantic_model = SentenceTransformer('all-MiniLM-L4-v2')
         logging.info("AI Model loaded successfully.")
@@ -263,36 +259,98 @@ if SentenceTransformer is not None:
 
 
 # ==============================================================================
-# DATABASE SETUP
+# GOOGLE SHEETS SETUP & CACHING
 # ==============================================================================
-db_path = 'news_articles.db'
-conn = sqlite3.connect(db_path, check_same_thread=False)
-cursor = conn.cursor()
-db_lock = threading.Lock() # Thread lock for database operations
+sheet = None
+sheet_lock = threading.Lock() # Locks access to the Google Sheet upload
+existing_urls_cache = set()   # Memory cache for fast deduplication
+recent_articles_cache = []    # Memory cache for AI clustering
 
-# Create table and check/add 'cluster_id' column
-try:
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS news (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        cluster_id TEXT,
-        source TEXT,
-        title TEXT,
-        url TEXT UNIQUE,
-        summary TEXT,
-        image_url TEXT,
-        scraped_at TIMESTAMP
-    )
-    ''')
-    cursor.execute("PRAGMA table_info(news)")
-    columns = [info[1] for info in cursor.fetchall()]
-    if 'cluster_id' not in columns:
-        cursor.execute("ALTER TABLE news ADD COLUMN cluster_id TEXT")
-        logging.info("Migration successful: Added 'cluster_id' column.")
-    conn.commit()
-except Exception as e:
-    logging.critical(f"Database setup failed: {e}")
-    sys.exit(1)
+def init_google_sheets():
+    """Initializes connection to Google Sheets and loads existing data into memory."""
+    global sheet, existing_urls_cache, recent_articles_cache
+    
+    try:
+        logging.info("Connecting to Google Sheets...")
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        
+        gcp_json = os.environ.get("GCP_SERVICE_ACCOUNT_JSON")
+        if not gcp_json:
+            raise ValueError("GCP_SERVICE_ACCOUNT_JSON secret is missing from environment variables!")
+            
+        creds_dict = json.loads(gcp_json)
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+        
+        # Open the specific worksheet
+        sheet = client.open(SHEET_NAME).worksheet(WORKSHEET_NAME)
+        logging.info(f"Connected to Sheet: {SHEET_NAME} / {WORKSHEET_NAME}")
+        
+        # --- CACHE WARMUP ---
+        # Fetch ALL data from Column A to build our local cache
+        logging.info("Fetching existing data to build cache...")
+        
+        # Get all values in column 1 (A)
+        try:
+            raw_column_data = sheet.col_values(1)
+        except Exception as e:
+            logging.error(f"Failed to fetch column values: {e}")
+            raw_column_data = []
+
+        logging.info(f"Loaded {len(raw_column_data)} rows from sheet.")
+        
+        cutoff_date = datetime.now() - timedelta(days=15)
+        
+        for cell_value in raw_column_data:
+            if not cell_value: continue
+            try:
+                # Parse JSON from cell
+                article_data = json.loads(cell_value)
+                
+                # 1. Populate URL cache (Deduplication)
+                if 'url' in article_data:
+                    existing_urls_cache.add(article_data['url'])
+                    
+                # 2. Populate AI Cache (Only recent articles)
+                if 'scraped_at' in article_data and 'title' in article_data and 'content' in article_data:
+                    # Handle different date formats if necessary
+                    try:
+                        scraped_date = datetime.strptime(str(article_data['scraped_at']).split('.')[0], "%Y-%m-%d %H:%M:%S")
+                        if scraped_date >= cutoff_date:
+                            recent_articles_cache.append({
+                                'title': article_data['title'],
+                                'content': article_data['content'],
+                                'cluster_id': article_data.get('cluster_id')
+                            })
+                    except:
+                        # If date parsing fails, just ignore for AI cache
+                        pass
+                        
+            except json.JSONDecodeError:
+                continue
+
+        logging.info(f"Cache built: {len(existing_urls_cache)} URLs, {len(recent_articles_cache)} recent articles for AI context.")
+
+    except Exception as e:
+        logging.critical(f"Failed to initialize Google Sheets: {e}")
+        sys.exit(1)
+
+def truncate_to_fit(article_obj):
+    """Recursively truncates content until the JSON string is under 50,000 chars."""
+    json_str = json.dumps(article_obj)
+    
+    # Check size (limit is 50,000, we use 49,000 as a safety buffer)
+    if len(json_str) < 49000:
+        return json_str
+    
+    # Truncate content
+    current_content = article_obj.get('content', '')
+    if len(current_content) > 1000:
+        logging.warning(f"Truncating article {article_obj.get('id', 'unknown')} (Size: {len(json_str)})")
+        article_obj['content'] = current_content[:-1000] + "... [TRUNCATED]"
+        return truncate_to_fit(article_obj)
+    else:
+        return json.dumps(article_obj)
 
 
 # ==============================================================================
@@ -300,31 +358,22 @@ except Exception as e:
 # ==============================================================================
 
 def get_cluster_id_for_article(new_title, new_summary):
-    """Checks DB for similar articles and assigns a cluster_id."""
+    """Checks memory cache for similar articles and assigns a cluster_id."""
     if semantic_model is None or util is None:
         return str(uuid.uuid4())
 
     try:
-        # --- CHANGED (from App1): Reverted to 15-day memory check ---
-        # Fetch recent articles (last 15 day)
-        cursor.execute('''
-            SELECT title, summary, cluster_id 
-            FROM news 
-            WHERE scraped_at >= datetime('now', '-15 day')
-        ''')
-        # ------------------------------------------------
-        recent_articles = cursor.fetchall()
-
-        if not recent_articles:
+        # Use the cache populated at startup
+        if not recent_articles_cache:
             return str(uuid.uuid4())
 
-        # CHANGED (from App1): Truncate to approx 350 words.
-        # 350 words is roughly 2000-2200 characters. Using 2000 as a safe, fast limit.
+        # Limit char count for embedding to speed up
         limit_chars = 2000
 
-        # Prepare data and convert to Embeddings with truncation
-        existing_texts = [f"{row[0]}. {row[1][:limit_chars]}" for row in recent_articles]
-        existing_ids = [row[2] for row in recent_articles]
+        # Prepare data and convert to Embeddings
+        # Note: 'content' in JSON maps to 'summary' in logic
+        existing_texts = [f"{a['title']}. {a['content'][:limit_chars]}" for a in recent_articles_cache]
+        existing_ids = [a['cluster_id'] for a in recent_articles_cache]
         
         # Same for the new text
         new_text = f"{new_title}. {new_summary[:limit_chars]}"
@@ -357,17 +406,16 @@ def get_cluster_id_for_article(new_title, new_summary):
 
 def save_article(source, title, url, summary, image_url):
     """
-    Saves a single article to the database. 
+    Saves a single article to Google Sheets. 
     INCLUDES: The strict 90-word minimum length check.
     """
+    global existing_urls_cache, recent_articles_cache
     
     # --- STEP 0: STRICT GLOBAL WORD COUNT CHECK ---
-    # Calculates word count on the final summary (whether full article or RSS fallback)
+    # Calculates word count on the final summary
     if not summary:
         final_word_count = 0
     else:
-        # Robustly calculate word count after initial cleanup
-        # KEPT APP2 "FLAT" STRUCTURE HERE
         cleaned_summary = " ".join(summary.replace('\n', ' ').replace('\r', ' ').split()).strip()
         final_word_count = len(cleaned_summary.split())
 
@@ -378,33 +426,54 @@ def save_article(source, title, url, summary, image_url):
     # ---------------------------------------------
     
     try:
-        # --- MORE ROBUST CLEANING (already performed partial cleanup for word count) ---
+        # --- MORE ROBUST CLEANING ---
         title = " ".join(title.replace('\n', ' ').replace('\r', ' ').split()).strip()
-        summary = cleaned_summary # Use the cleaned summary from above
+        summary = cleaned_summary 
         
         if not image_url:
             image_url = "No image available"
-        # ----------------------------
-
+        
         # --- THREAD-SAFE BLOCK ---
-        with db_lock:
-            # First, check if the URL already exists (the primary skip)
-            cursor.execute("SELECT id FROM news WHERE url = ?", (url,))
-            if cursor.fetchone():
+        with sheet_lock:
+            # 1. Check Duplicates (using Memory Cache)
+            if url in existing_urls_cache:
                 logging.info(f"Duplicate article skipped: {title} from {source}")
                 return False 
             
-            # --- Get Cluster ID ---
-            # Use the already cleaned/validated summary for clustering
+            # 2. Get Cluster ID
             cluster_id = get_cluster_id_for_article(title, summary)
-            # ----------------------
+            
+            # 3. Generate ID (random integer to match previous schema style)
+            article_id = random.randint(100000, 999999)
 
-            # If not found, insert it with the cluster_id
-            cursor.execute('''
-                INSERT INTO news (cluster_id, source, title, url, summary, image_url, scraped_at) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (cluster_id, source, title, url, summary, image_url, datetime.now()))
-            conn.commit()
+            # 4. Create Object
+            article_obj = {
+                "id": article_id,
+                "cluster_id": cluster_id,
+                "source": source,
+                "title": title,
+                "url": url,
+                "content": summary, # Map summary to 'content'
+                "image_url": image_url,
+                "scraped_at": str(datetime.now())
+            }
+
+            # 5. Truncate if needed
+            safe_json = truncate_to_fit(article_obj)
+            
+            # 6. Upload to Sheet
+            sheet.append_row([safe_json])
+            
+            # 7. Update Caches immediately
+            existing_urls_cache.add(url)
+            recent_articles_cache.append({
+                'title': title, 
+                'content': summary, 
+                'cluster_id': cluster_id
+            })
+            
+            # 8. Sleep briefly to prevent API rate limits
+            time.sleep(1.5)
         # -------------------------
         
         logging.info(f"Saved article: {title} from {source} ({final_word_count} words)")
@@ -415,7 +484,7 @@ def save_article(source, title, url, summary, image_url):
         return False
 
 
-# --- RE-ARCHITECTED: Generic Scraper Function with Strategy Loop ---
+# --- GENERIC SCRAPER FUNCTION (UNCHANGED LOGIC) ---
 def scrape_source(session, selenium_driver, source_config, proxies_dict):
     """
     A generic function that scrapes any source based on its config.
@@ -440,10 +509,8 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
         logging.info(f"Found {len(items)} articles in {name} RSS feed. Processing until {MAX_ARTICLES_PER_SOURCE} new articles are saved.")
 
         # 2. Process each article
-        # UPDATED (from App1): Loop through ALL items, not just the first set
         for item in items:
             
-            # UPDATED (from App1): Stop processing if we have successfully saved our target quota
             if len(articles_saved_list) >= MAX_ARTICLES_PER_SOURCE:
                  logging.info(f"[{name}] Target reached: Successfully saved {MAX_ARTICLES_PER_SOURCE} new articles.")
                  break
@@ -453,9 +520,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
             rss_description = None
 
             try:
-                if not item.link:
-                    continue
-                
+                if not item.link: continue
                 article_url = item.link.text.strip()
                 
                 # Check for URL filter
@@ -463,25 +528,20 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     logging.warning(f"[{name}] Skipping non-article link: {article_url}")
                     continue
                 
-                # --- Early Skip Check ---
-                with db_lock:
-                    cursor.execute("SELECT id FROM news WHERE url = ?", (article_url,))
-                    if cursor.fetchone():
-                        logging.info(f"[{name}] Early skip: URL {article_url} already exists.")
-                        # CHANGED (from App1): Small sleep to prevent CPU spiking
-                        time.sleep(0.001)
-                        continue
+                # --- Early Skip Check (Fast Cache) ---
+                if article_url in existing_urls_cache:
+                    logging.info(f"[{name}] Early skip: URL {article_url} already exists.")
+                    time.sleep(0.001)
+                    continue
                 # -------------------------
 
                 rss_title = item.title.text if item.title else "Title not found"
                 
-                # Get the raw RSS description now, for potential fallback later
                 if item.description:
-                    # Use BeautifulSoup to strip any HTML from the RSS description
                     summary_soup = BeautifulSoup(item.description.text, 'html.parser')
                     rss_description = summary_soup.get_text().strip()
                 
-                # --- NEW MULTI-STRATEGY LOGIC ---
+                # --- MULTI-STRATEGY LOGIC ---
                 summary = None
                 raw_html = None
                 final_title = rss_title
@@ -494,7 +554,6 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     logging.info(f"[{name}] Attempt {i+1}/{len(strategies)}: Trying with '{strategy}' strategy...")
                     
                     try:
-                        # --- STRATEGY ROUTER ---
                         if strategy.startswith('requests_'):
                             header_type = strategy.replace('requests_', '')
                             article_headers = get_headers(header_type)
@@ -510,49 +569,35 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                                 continue
                             
                             selenium_driver.get(article_url)
-                            
-                            # Use Explicit Wait
                             try:
-                                WebDriverWait(selenium_driver, 10).until(
-                                    EC.presence_of_element_located((By.TAG_NAME, "p"))
-                                )
+                                WebDriverWait(selenium_driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "p")))
                                 logging.info(f"[{name}] Page content loaded.")
                             except TimeoutException:
                                 logging.warning(f"[{name}] Page timed out (10s). Proceeding anyway.")
-                                
+                            
                             raw_html = selenium_driver.page_source
                         
                         else:
-                            logging.error(f"[{name}] Unknown strategy: {strategy}. Skipping.")
-                            continue
-                        # --- END STRATEGY ROUTER ---
+                             logging.error(f"[{name}] Unknown strategy: {strategy}. Skipping.")
+                             continue
 
-                        # 4. Extract Content
                         if not raw_html:
                             logging.warning(f"[{name}] FAILED with '{strategy}' (HTML was empty).")
                             continue
 
                         temp_summary = trafilatura.extract(raw_html, include_comments=False, include_tables=False)
-                        
                         word_count = len(temp_summary.split()) if temp_summary else 0
                         
-                        # --- MODIFIED: Word count check set to 90 ---
                         if word_count >= 90:
-                        # --------------------------------------------
                             logging.info(f"[{name}] Success with '{strategy}'. Found content ({word_count} words).")
                             summary = temp_summary
-                            
-                            # Parse metadata
                             soup = BeautifulSoup(raw_html, 'html.parser')
                             page_title = soup.find('title')
-                            if page_title:
-                                final_title = page_title.text
-                                
+                            if page_title: final_title = page_title.text
+                            
                             og_image = soup.find('meta', property='og:image')
-                            if og_image:
-                                image_url = og_image['content']
-                                
-                            break # <-- Success! Exit the strategy loop.
+                            if og_image: image_url = og_image['content']
+                            break 
                         else:
                             logging.warning(f"[{name}] FAILED with '{strategy}' (content was too short: {word_count} words).")
                     
@@ -562,14 +607,10 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     if i < len(strategies) - 1:
                         time.sleep(random.uniform(0.5, 1.0))
                 
-                # --- END OF STRATEGY LOOP ---
-
-                # 5. Final Summary Assignment (If all strategies failed, use the RSS description)
                 if not summary:
                     logging.error(f"[{name}] All scrape strategies failed for {article_url}. Falling back to RSS description.")
                     summary = rss_description or "No content available"
 
-                # 6. Save (The save_article function now handles the final 90-word check)
                 was_saved = save_article(name, final_title, article_url, summary, image_url)
                 if was_saved:
                     articles_saved_list.append(final_title)
@@ -587,7 +628,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     return (name, len(articles_saved_list))
 
 
-# --- NEW: Thread Wrapper Function ---
+# --- Thread Wrapper Function ---
 def scrape_source_wrapper(source, session, proxies_dict):
     """
     A wrapper function to be run in a separate thread.
@@ -595,7 +636,6 @@ def scrape_source_wrapper(source, session, proxies_dict):
     """
     name = source.get('name', 'Unknown')
     driver = None
-    
     needs_selenium = any('selenium' in s for s in source.get('article_strategies', []))
     
     try:
@@ -612,7 +652,6 @@ def scrape_source_wrapper(source, session, proxies_dict):
         return (name, 0)
     
     finally:
-        # --- Surgical Kill for the driver ---
         if driver:
             logging.info(f"[{name}] (Thread) Finished. Attempting to shut down its Selenium driver.")
             pid_to_kill = None
@@ -634,22 +673,20 @@ def scrape_source_wrapper(source, session, proxies_dict):
                         logging.error(f"[{name}] (Thread) Failed to kill process PID {pid_to_kill}: {e_kill}")
                 else:
                     logging.error(f"[{name}] (Thread) driver.quit() failed, but PID was not found. A zombie process may remain.")
-            
 
-# --- REFACTORED: scrape_all() ---
+# --- scrape_all() ---
 def scrape_all():
     """Runs all scraping jobs defined in SOURCE_CONFIG in parallel."""
-    logging.info("--- Starting new scraping job (Parallel Mode) ---")
+    logging.info("--- Starting new scraping job (Parallel Mode - Google Sheets) ---")
     
+    # Initialize Google Sheets BEFORE threads start (loads cache)
+    init_google_sheets()
+
     session = create_robust_session()
-    
     proxies_dict = None
     if PROXY_SETTINGS["use_proxies"] and PROXY_SETTINGS["proxy_url"]:
         logging.info(f"Proxy is ENABLED. Routing requests through: {PROXY_SETTINGS['proxy_url']}")
-        proxies_dict = {
-            "http": PROXY_SETTINGS["proxy_url"],
-            "https": PROXY_SETTINGS["proxy_url"]
-        }
+        proxies_dict = {"http": PROXY_SETTINGS["proxy_url"], "https": PROXY_SETTINGS["proxy_url"]}
     else:
         logging.info("Proxy is DISABLED.")
     
@@ -666,8 +703,8 @@ def scrape_all():
             futures.append(future)
 
         logging.info(f"Submitted {len(futures)} jobs to thread pool. Waiting up to 300s for completion...")
-        
-        # 2. Wait for jobs to complete, with a 5-minute (300s) timeout
+
+        # 2. Wait for jobs to complete
         done, not_done = wait(futures, timeout=300)
 
         # 3. Process completed jobs
@@ -679,54 +716,39 @@ def scrape_all():
             except Exception as e:
                 logging.error(f"A future job resulted in an error: {e}")
         
-        # 4. Handle jobs that timed out
+        # 4. Handle timeouts
         if not_done:
             logging.critical(f"--- TIMEOUT: {len(not_done)} scrape jobs did not complete in 300s. ---")
             for future in not_done:
                 logging.error("A thread has timed out and will be abandoned.")
                 all_counts["Timed_Out_Jobs"] = all_counts.get("Timed_Out_Jobs", 0) + 1
-
+        
     except Exception as e:
         logging.critical(f"--- CRITICAL: The entire scrape_all job failed. --- {e}")
-        
+
     finally:
-        # 5. Shut down the executor
         logging.info("Shutting down thread pool (wait=False)...")
         executor.shutdown(wait=False)
         
-        # Create a dynamic log message
         log_summary = ", ".join(f"{count} {name}" for name, count in all_counts.items())
         log_message = f"Scraped: {log_summary} articles. (Total saved: {total_saved})"
-        
         logging.info(log_message)
         print(log_message)
-        
         logging.info("--- Scraping job finished ---")
 
 
-# --- main() function with cleanup ---
 def main():
     """
     Main function to run the scraper once.
     Includes robust error handling and DB connection closing.
     """
-    global conn
-    
     try:
-        logging.info("--- Scraper service started (CI Mode: Run Once) ---")
-        
-        print("Running single scrape for CI...")
+        logging.info("--- Scraper service started ---")
         scrape_all()
-        
-        print("Scrape finished.")
-            
     except Exception as e:
-        logging.critical(f"A critical error occurred in the main function: {e}")
+        logging.critical(f"Critical error in main: {e}")
     finally:
-        if conn:
-            conn.close()
-            logging.info("--- Scraper service stopped and database connection closed. ---")
-            print("Scraper stopped and database connection closed.")
+        logging.info("--- Scraper service finished ---")
         
         # Force process exit to kill zombie threads (especially for Selenium)
         logging.info("--- Main thread finished. Forcing process exit to kill zombie threads. ---")

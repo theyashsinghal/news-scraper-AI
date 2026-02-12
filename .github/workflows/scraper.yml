@@ -56,7 +56,7 @@ jobs:
         run: |
           python news_scraper_AI.py
 
-      # --- RESTORED: Timestamped Log Creation ---
+      # --- RESTORED & CLEANED: Timestamped Log Creation ---
       - name: Save logs with timestamp
         run: |
           mkdir -p logs
@@ -64,8 +64,9 @@ jobs:
           LOG_FILE="logs/scraper_${TIMESTAMP}_run${{ github.run_number }}.log"
           
           if [ -f news_scraper.log ]; then
-            cp news_scraper.log "$LOG_FILE"
-            echo "Log saved as $LOG_FILE"
+            # MOVE the file to the logs directory so it doesn't stay in root
+            mv news_scraper.log "$LOG_FILE"
+            echo "Log moved to $LOG_FILE"
           else
             echo "No log file found to save"
           fi
@@ -78,8 +79,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Stage the logs folder and the main log file
-          git add logs/ news_scraper.log
+          # Stage ONLY the logs folder
+          git add logs/
 
           # Only proceed if there are changes
           if ! git diff --staged --quiet; then
@@ -90,7 +91,7 @@ jobs:
             echo "Pulling latest changes from remote..."
             git pull --rebase origin main
             
-            # Push changes with retry logic (RESTORED FROM OLD WORKFLOW)
+            # Push changes with retry logic
             echo "Pushing changes..."
             MAX_RETRIES=3
             RETRY_COUNT=0

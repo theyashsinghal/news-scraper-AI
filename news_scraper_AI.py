@@ -30,6 +30,10 @@ import sys
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, wait
 import random
+import urllib3
+
+# Suppress insecure request warnings for AP News
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- Google Sheets Imports ---
 import gspread
@@ -39,7 +43,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 try:
     from sentence_transformers import SentenceTransformer, util
 except ImportError:
-    logging.critical("sentence-transformers not installed. Run 'pip install sentence-transformers'. AI clustering will be skipped.")
+    logging.critical("sentence-transformers not installed. Clustering will be skipped.")
     SentenceTransformer = None
     util = None
 # -------------------------------------
@@ -52,9 +56,10 @@ try:
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
+    from selenium.webdriver.common.page_load_strategy import PageLoadStrategy
     SELENIUM_AVAILABLE = True
 except ImportError:
-    logging.critical("Selenium not installed. Run 'pip install selenium'. Selenium-dependent sources will fail.")
+    logging.critical("Selenium not installed. Selenium-dependent sources will fail.")
     SELENIUM_AVAILABLE = False
 # ---------------------------
 
@@ -124,13 +129,18 @@ def create_selenium_driver():
         options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
+        
+        # --- FIX 1: Eager Loading Strategy ---
+        # This makes the driver stop waiting once HTML is downloaded (ignoring ads/images)
+        options.page_load_strategy = 'eager' 
+        
         options.add_argument(f"user-agent={random.choice(BROWSER_USER_AGENTS)}")
 
         if PROXY_SETTINGS["use_proxies"] and PROXY_SETTINGS["proxy_url"]:
             options.add_argument(f"--proxy-server={PROXY_SETTINGS['proxy_url']}")
 
         driver = webdriver.Chrome(options=options)
-        driver.set_page_load_timeout(20)
+        driver.set_page_load_timeout(25) # Increased slightly
         logging.info("Selenium driver initialized successfully.")
         return driver
     except WebDriverException as e:
@@ -213,6 +223,7 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser'],
         'article_url_contains': None,
         'referer': 'https://apnews.com/',
+        'verify_ssl': False # --- FIX 2: SSL Bypass ---
     },
     {
         'name': 'South China Morning Post',
@@ -247,10 +258,11 @@ semantic_model = None
 if SentenceTransformer is not None:
     try:
         logging.info("Loading AI Semantic Model (all-MiniLM-L4-v2)...")
+        # Try local loading or downloading with specific parameters
         semantic_model = SentenceTransformer('all-MiniLM-L4-v2')
         logging.info("AI Model loaded successfully.")
     except Exception as e:
-        logging.critical(f"Failed to load AI model: {e}. Clustering is disabled.")
+        logging.warning(f"Failed to load AI model: {e}. Clustering is disabled (Normal in CI/CD environments).")
         semantic_model = None
 
 
@@ -262,9 +274,9 @@ sheet_lock = threading.Lock() # Locks access to the Google Sheet upload
 existing_urls_cache = set()   # Memory cache for fast deduplication
 recent_articles_cache = []    # Memory cache for AI clustering
 
-# --- NEW: Global Max ID Counter ---
+# --- Global Max ID Counter ---
 MAX_ID = 0 
-# ----------------------------------
+# -----------------------------
 
 def init_google_sheets():
     """Initializes connection to Google Sheets and loads existing data into memory."""
@@ -311,7 +323,7 @@ def init_google_sheets():
                 if 'url' in article_data:
                     existing_urls_cache.add(article_data['url'])
                 
-                # --- NEW: Update Max ID ---
+                # --- Update Max ID ---
                 if 'id' in article_data:
                     try:
                         current_id = int(article_data['id'])
@@ -493,13 +505,14 @@ def save_article(source, title, url, summary, image_url):
         return False
 
 
-# --- GENERIC SCRAPER FUNCTION (UNCHANGED LOGIC) ---
+# --- GENERIC SCRAPER FUNCTION ---
 def scrape_source(session, selenium_driver, source_config, proxies_dict):
     """
     A generic function that scrapes any source based on its config.
     """
     name = source_config['name']
     rss_url = source_config['rss_url']
+    verify_ssl = source_config.get('verify_ssl', True) # Default to True
     
     articles_saved_list = []
     
@@ -508,7 +521,9 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     try:
         # 1. Get RSS Feed
         rss_headers = get_headers(source_config['rss_headers_type'])
-        response = session.get(rss_url, headers=rss_headers, timeout=20, proxies=proxies_dict)  
+        
+        # Pass verify=False if config requires it (e.g. AP News)
+        response = session.get(rss_url, headers=rss_headers, timeout=20, proxies=proxies_dict, verify=verify_ssl)  
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'xml')
@@ -566,7 +581,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             article_headers = get_headers(header_type)
                             article_headers['Referer'] = source_config['referer']
                             
-                            page_response = session.get(article_url, headers=article_headers, timeout=20, proxies=proxies_dict)
+                            page_response = session.get(article_url, headers=article_headers, timeout=20, proxies=proxies_dict, verify=verify_ssl)
                             page_response.raise_for_status()
                             raw_html = page_response.text
                         
@@ -577,10 +592,11 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             
                             selenium_driver.get(article_url)
                             try:
-                                WebDriverWait(selenium_driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "p")))
+                                # Shorter wait since we use eager loading
+                                WebDriverWait(selenium_driver, 15).until(EC.presence_of_element_located((By.TAG_NAME, "p")))
                                 logging.info(f"[{name}] Page content loaded.")
                             except TimeoutException:
-                                logging.warning(f"[{name}] Page timed out (10s). Proceeding anyway.")
+                                logging.warning(f"[{name}] Page timed out (15s). Proceeding anyway.")
                             
                             raw_html = selenium_driver.page_source
                         

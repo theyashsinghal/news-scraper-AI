@@ -18,7 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          persist-credentials: true  # Needed to push changes back
+          persist-credentials: true
           fetch-depth: 0
 
       - name: Set up Python 3.10
@@ -56,22 +56,19 @@ jobs:
         run: |
           python news_scraper_AI.py
 
-      # --- RESTORED & CLEANED: Timestamped Log Creation ---
-      - name: Save logs with timestamp
+      - name: Process Logs
         run: |
           mkdir -p logs
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
           LOG_FILE="logs/scraper_${TIMESTAMP}_run${{ github.run_number }}.log"
           
           if [ -f news_scraper.log ]; then
-            # MOVE the file to the logs directory so it doesn't stay in root
             mv news_scraper.log "$LOG_FILE"
             echo "Log moved to $LOG_FILE"
           else
-            echo "No log file found to save"
+            echo "No log file found."
           fi
 
-      # --- RESTORED: Robust Commit & Push with Retries ---
       - name: Commit and push logs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -79,19 +76,23 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Stage ONLY the logs folder
+          # 1. Stage ONLY the logs folder
           git add logs/
 
-          # Only proceed if there are changes
+          # 2. Check if there is anything to commit
           if ! git diff --staged --quiet; then
             echo "Changes detected, committing..."
             git commit -m "Update scraper logs [skip ci]"
             
-            # Pull latest changes with rebase strategy
-            echo "Pulling latest changes from remote..."
+            # --- FIX: DISCARD UNWANTED CHANGES ---
+            # This deletes __pycache__ and other temp files that block the pull
+            git reset --hard
+            
+            # 3. Pull latest changes (Now safe because directory is clean)
+            echo "Pulling latest changes..."
             git pull --rebase origin main
             
-            # Push changes with retry logic
+            # 4. Push with Retry Logic
             echo "Pushing changes..."
             MAX_RETRIES=3
             RETRY_COUNT=0

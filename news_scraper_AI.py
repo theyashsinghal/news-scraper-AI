@@ -180,14 +180,14 @@ SOURCE_CONFIG = [
         'article_url_contains': None,
         'referer': 'https://www.thehindu.com/',
     },
-    # {
-    #     'name': 'The Dawn',
-    #     'rss_url': 'https://www.dawn.com/feeds/home',
-    #     'rss_headers_type': 'browser',
-    #     'article_strategies': ['requests_browser', 'selenium_browser'],
-    #     'article_url_contains': None,
-    #     'referer': 'https://www.dawn.com/',
-    # },
+    {
+        'name': 'The Dawn',
+        'rss_url': 'https://www.dawn.com/feeds/home',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser', 'selenium_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.dawn.com/',
+    },
     {
         'name': 'Al Jazeera',
         'rss_url': 'https://www.aljazeera.com/xml/rss/all.xml',

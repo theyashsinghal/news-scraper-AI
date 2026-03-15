@@ -1,56 +1,56 @@
 name: Run News Scraper with logs
-
 on:
   schedule:
     - cron: '*/30 * * * *'  # Run every 30 minutes
   workflow_dispatch:      # Manual trigger
-
 # Prevent multiple instances from running simultaneously
 concurrency:
   group: news-scraper
   cancel-in-progress: false
-
 jobs:
   scrape_news:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
           fetch-depth: 1
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           cache: 'pip'
 
       # --- CACHE AI MODELS ---
+      # Using a static key so the cache doesn't bust every time requirements.txt changes
+      # (model version hasn't changed, only other deps might)
       - name: Cache HuggingFace Models
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: ${{ runner.os }}-huggingface-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-huggingface-
+          key: ${{ runner.os }}-huggingface-MiniLM-L6-v2
 
+      # FIX: Pin Chrome to version 144 to avoid renderer timeout regression in Chrome 145+
+      # Chrome 145 introduced a headless renderer instability on GitHub Actions CPU runners
+      # that causes "Timed out receiving message from renderer" on every Selenium page load.
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: '144'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          
-          # Force CPU PyTorch to save space
+
+          # Force CPU-only PyTorch to save space and avoid GPU dependency
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          
+
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run scraper
         env:
-          DISPLAY: :99
           # Inject the Secret Key for Google Sheets
           GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
         run: |
@@ -61,7 +61,7 @@ jobs:
           mkdir -p logs
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
           LOG_FILE="logs/scraper_${TIMESTAMP}_run${{ github.run_number }}.log"
-          
+
           if [ -f news_scraper.log ]; then
             mv news_scraper.log "$LOG_FILE"
             echo "Log moved to $LOG_FILE"
@@ -75,7 +75,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           # 1. Stage ONLY the logs folder
           git add logs/
 
@@ -83,32 +83,34 @@ jobs:
           if ! git diff --staged --quiet; then
             echo "Changes detected, committing..."
             git commit -m "Update scraper logs [skip ci]"
-            
-            # --- FIX: DISCARD UNWANTED CHANGES ---
-            # This deletes __pycache__ and other temp files that block the pull
-            git reset --hard
-            
-            # 3. Pull latest changes (Now safe because directory is clean)
+
+            # Clean untracked files (__pycache__ etc) that would block the pull
+            # FIX: Using 'git clean -fd' instead of 'git reset --hard'
+            # reset --hard can discard the commit itself if something goes wrong;
+            # clean -fd only removes untracked/temp files, leaving commits intact.
+            git clean -fd
+
+            # 3. Pull latest changes (safe now that directory is clean)
             echo "Pulling latest changes..."
             git pull --rebase origin main
-            
+
             # 4. Push with Retry Logic
             echo "Pushing changes..."
             MAX_RETRIES=3
             RETRY_COUNT=0
-            
+
             until git push origin HEAD:main || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
               RETRY_COUNT=$((RETRY_COUNT+1))
               echo "Push failed, retry $RETRY_COUNT of $MAX_RETRIES..."
               sleep 2
               git pull --rebase origin main
             done
-            
+
             if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
               echo "Failed to push after $MAX_RETRIES attempts"
               exit 1
             fi
-            
+
             echo "Successfully pushed changes"
           else
             echo "No changes to commit"

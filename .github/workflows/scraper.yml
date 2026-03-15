@@ -32,15 +32,20 @@ jobs:
           key: ${{ runner.os }}-huggingface-MiniLM-L6-v2
 
       # FIX: Install both Chrome AND ChromeDriver via the action so they always match.
-      # Previously 'stable' ChromeDriver (146) was mismatching runner's pre-installed Chrome (145).
       # install-chrome: true forces the action to install its own Chrome, overriding the runner's.
-      # Both Chrome and ChromeDriver will be the same 'stable' version.
+      # set-path: true forces the runner to use these versions over the system defaults.
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
           install-chromedriver: true
           install-chrome: true
+          set-path: true
+
+      - name: Check Chrome and Driver Versions
+        run: |
+          google-chrome --version
+          chromedriver --version
 
       - name: Install dependencies
         run: |

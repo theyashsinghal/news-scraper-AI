@@ -253,8 +253,8 @@ semantic_model = None
 if SentenceTransformer is not None:
     try:
         # CHANGED (from App1): Switched to L4 model
-        logging.info("Loading AI Semantic Model (all-MiniLM-L4-v2)...")
-        semantic_model = SentenceTransformer('all-MiniLM-L4-v2')
+        logging.info("Loading AI Semantic Model (all-MiniLM-L6-v2)...")
+        semantic_model = SentenceTransformer('all-MiniLM-L6-v2')
         logging.info("AI Model loaded successfully.")
     except Exception as e:
         logging.critical(f"Failed to load AI model: {e}. Clustering is disabled.")

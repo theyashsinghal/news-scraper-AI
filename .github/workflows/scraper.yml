@@ -24,29 +24,29 @@ jobs:
           cache: 'pip'
 
       # --- CACHE AI MODELS ---
-      # Using a static key so the cache doesn't bust every time requirements.txt changes
-      # (model version hasn't changed, only other deps might)
+      # Static key so cache doesn't bust every time requirements.txt changes
       - name: Cache HuggingFace Models
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
           key: ${{ runner.os }}-huggingface-MiniLM-L6-v2
 
-      # FIX: Pin Chrome to version 144 to avoid renderer timeout regression in Chrome 145+
-      # Chrome 145 introduced a headless renderer instability on GitHub Actions CPU runners
-      # that causes "Timed out receiving message from renderer" on every Selenium page load.
+      # FIX: Use @v2 (not @v1) — v1 ignores specific version numbers and always installs latest.
+      # v2 correctly resolves pinned versions from Chrome for Testing registry.
+      # Also installing chromedriver to ensure it matches the pinned Chrome version exactly.
+      # Using 'stable' instead of a number since Chrome 144 is no longer in the CfT registry.
+      # 'stable' on @v2 gives a fixed known-good version instead of 'latest' which gave us 145.
       - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
         with:
-          chrome-version: '144'
+          chrome-version: stable
+          install-chromedriver: true
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-
           # Force CPU-only PyTorch to save space and avoid GPU dependency
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run scraper
@@ -61,7 +61,6 @@ jobs:
           mkdir -p logs
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
           LOG_FILE="logs/scraper_${TIMESTAMP}_run${{ github.run_number }}.log"
-
           if [ -f news_scraper.log ]; then
             mv news_scraper.log "$LOG_FILE"
             echo "Log moved to $LOG_FILE"

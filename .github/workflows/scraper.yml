@@ -84,11 +84,8 @@ jobs:
             echo "Changes detected, committing..."
             git commit -m "Update scraper logs [skip ci]"
 
-            # Clean untracked files (__pycache__ etc) that would block the pull
-            # FIX: Using 'git clean -fd' instead of 'git reset --hard'
-            # reset --hard can discard the commit itself if something goes wrong;
-            # clean -fd only removes untracked/temp files, leaving commits intact.
-            git clean -fd
+            # Discard __pycache__ and other temp files that would block the pull
+            git reset --hard
 
             # 3. Pull latest changes (safe now that directory is clean)
             echo "Pulling latest changes..."

@@ -31,16 +31,16 @@ jobs:
           path: ~/.cache/huggingface
           key: ${{ runner.os }}-huggingface-MiniLM-L6-v2
 
-      # FIX: Use @v2 (not @v1) — v1 ignores specific version numbers and always installs latest.
-      # v2 correctly resolves pinned versions from Chrome for Testing registry.
-      # Also installing chromedriver to ensure it matches the pinned Chrome version exactly.
-      # Using 'stable' instead of a number since Chrome 144 is no longer in the CfT registry.
-      # 'stable' on @v2 gives a fixed known-good version instead of 'latest' which gave us 145.
+      # FIX: Install both Chrome AND ChromeDriver via the action so they always match.
+      # Previously 'stable' ChromeDriver (146) was mismatching runner's pre-installed Chrome (145).
+      # install-chrome: true forces the action to install its own Chrome, overriding the runner's.
+      # Both Chrome and ChromeDriver will be the same 'stable' version.
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
           install-chromedriver: true
+          install-chrome: true
 
       - name: Install dependencies
         run: |

@@ -65,8 +65,11 @@ except ImportError:
 # ---------------------------
 
 # --- Configure logging ---
+# FIX 1: Changed filemode from 'a' (append) to 'w' (overwrite).
+# Each run now gets a clean log. The workflow already saves logs with timestamps,
+# so no history is lost.
 logging.basicConfig(filename='news_scraper.log',
-                    filemode='a',
+                    filemode='w',
                     level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -131,6 +134,10 @@ def create_selenium_driver():
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument(f"user-agent={random.choice(BROWSER_USER_AGENTS)}")
+        # FIX 2: Added Chrome flags to prevent renderer timeout issues seen with Chrome 145+
+        # on GitHub Actions runners. Fixes "Timed out receiving message from renderer" errors.
+        options.add_argument("--disable-features=VizDisplayCompositor")
+        options.add_argument("--renderer-process-limit=1")
 
         if PROXY_SETTINGS["use_proxies"] and PROXY_SETTINGS["proxy_url"]:
             options.add_argument(f"--proxy-server={PROXY_SETTINGS['proxy_url']}")
@@ -252,7 +259,7 @@ SOURCE_CONFIG = [
 semantic_model = None
 if SentenceTransformer is not None:
     try:
-        # CHANGED (from App1): Switched to L4 model
+        # FIX 3: Removed stale comment referencing L4 model.
         logging.info("Loading AI Semantic Model (all-MiniLM-L6-v2)...")
         semantic_model = SentenceTransformer('all-MiniLM-L6-v2')
         logging.info("AI Model loaded successfully.")
@@ -405,7 +412,10 @@ def get_cluster_id_for_article(new_title, new_summary):
                 best_score = score
                 best_idx = i
 
-        THRESHOLD = 0.70 # Default semantic threshold
+        # FIX 4: Raised threshold from 0.70 to 0.82 to prevent false positive clustering.
+        # At 0.82+, only near-identical articles cluster. Borderline paraphrases are
+        # intentionally left as separate entries since false positives are not acceptable.
+        THRESHOLD = 0.82
         
         if best_score >= THRESHOLD:
             logging.info(f"DEDUPLICATION: Found match (Score: {best_score:.2f}). Linking to Cluster ID: {existing_ids[best_idx]}")
@@ -431,7 +441,6 @@ def save_article(source, title, url, summary, image_url):
         final_word_count = 0
     else:
         # Robustly calculate word count after initial cleanup
-        # KEPT APP2 "FLAT" STRUCTURE HERE
         cleaned_summary = " ".join(summary.replace('\n', ' ').replace('\r', ' ').split()).strip()
         final_word_count = len(cleaned_summary.split())
 
@@ -482,7 +491,6 @@ def save_article(source, title, url, summary, image_url):
             safe_json = truncate_to_fit(article_obj)
             
             # Upload to Sheet
-            # Retrying logic can be added here if needed, but the lock is crucial
             sheet.append_row([safe_json])
             
             # Update Caches immediately
@@ -492,13 +500,13 @@ def save_article(source, title, url, summary, image_url):
                 'content': summary, 
                 'cluster_id': cluster_id
             })
-            
-            # --- CRITICAL FIX: Rate Limiting ---
-            # Google Sheets API has a rate limit (60 requests/min).
-            # We sleep 2.0 seconds to guarantee we never exceed 30 req/min.
-            time.sleep(2.0)
-            
+
         # -------------------------
+        # FIX 5: Moved sleep OUTSIDE the lock.
+        # Previously sleep(2.0) was inside the with sheet_lock block, which held the lock
+        # for 2 full seconds on every save and completely serialized all 12 threads.
+        # Now only the actual sheet write holds the lock; sleep happens after release.
+        time.sleep(2.0)
         
         # Explicit LOGGING as requested
         logging.info(f">>> SUCCESSFULLY SAVED [ID: {new_id}] - {title} from {source} ({final_word_count} words)")
@@ -535,10 +543,9 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
         logging.info(f"Found {len(items)} articles in {name} RSS feed. Processing until {MAX_ARTICLES_PER_SOURCE} new articles are saved.")
 
         # 2. Process each article
-        # UPDATED (from App1): Loop through ALL items, not just the first set
         for item in items:
             
-            # UPDATED (from App1): Stop processing if we have successfully saved our target quota
+            # Stop processing if we have successfully saved our target quota
             if len(articles_saved_list) >= MAX_ARTICLES_PER_SOURCE:
                  logging.info(f"[{name}] Target reached: Successfully saved {MAX_ARTICLES_PER_SOURCE} new articles.")
                  break
@@ -562,7 +569,6 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                 # Check cache instead of DB
                 if article_url in existing_urls_cache:
                     logging.info(f"[{name}] Early skip: URL {article_url} already exists.")
-                    # CHANGED (from App1): Small sleep to prevent CPU spiking
                     time.sleep(0.001)
                     continue
                 # -------------------------
@@ -630,9 +636,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                         
                         word_count = len(temp_summary.split()) if temp_summary else 0
                         
-                        # --- MODIFIED: Word count check set to 90 ---
                         if word_count >= 90:
-                        # --------------------------------------------
                             logging.info(f"[{name}] Success with '{strategy}'. Found content ({word_count} words).")
                             summary = temp_summary
                             
@@ -819,7 +823,6 @@ def main():
     except Exception as e:
         logging.critical(f"A critical error occurred in the main function: {e}")
     finally:
-        # No DB conn to close anymore
         logging.info("--- Scraper service stopped. ---")
         print("Scraper stopped.")
         

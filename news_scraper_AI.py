@@ -22,6 +22,7 @@ WORKSHEET_NAME = 'Sheet1'
 # ==============================================================================
 
 import requests
+import urllib3
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
@@ -40,6 +41,9 @@ from datetime import datetime, timedelta
 # --- Google Sheets Imports ---
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+
+# Suppress insecure request warnings for SSL bypass
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- NEW: Imports for AI/Semantics ---
 try:
@@ -76,9 +80,13 @@ logging.basicConfig(filename='news_scraper.log',
 # --- Robust Session and Header Management ---
 
 def create_robust_session():
-    """Creates a requests.Session with automatic retries."""
+    """Creates a requests.Session with automatic retries and disabled SSL verification."""
     logging.info("Creating new robust session with 3 retries on 5xx/connection/read errors.")
     session = requests.Session()
+    
+    # Disable SSL verification globally for this session to bypass 'Weak Key' errors
+    session.verify = False 
+    
     retry_strategy = Retry(
         total=3,
         backoff_factor=1,

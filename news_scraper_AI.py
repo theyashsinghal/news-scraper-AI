@@ -150,6 +150,12 @@ def create_selenium_driver():
         if PROXY_SETTINGS["use_proxies"] and PROXY_SETTINGS["proxy_url"]:
             options.add_argument(f"--proxy-server={PROXY_SETTINGS['proxy_url']}")
 
+        # --- FATAL FIX: Force explicit Chrome binary path from GitHub Action ---
+        chrome_bin = os.environ.get('CHROME_BIN')
+        if chrome_bin:
+            options.binary_location = chrome_bin
+        # -----------------------------------------------------------------------
+
         driver = webdriver.Chrome(options=options)
         driver.set_page_load_timeout(20)
         logging.info("Selenium driver initialized successfully.")

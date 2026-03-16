@@ -242,31 +242,32 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': '.cms',
         'referer': 'https://economictimes.indiatimes.com/',
-    },
-    {
-        'name': 'South China Morning Post',
-        'rss_url': 'https://www.scmp.com/rss/91/feed',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.scmp.com/',
-    },
-    {
-        'name': 'China Daily',
-        'rss_url': 'http://www.chinadaily.com.cn/rss/china_rss.xml',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.chinadaily.com.cn/',
-    },
-    {
-        'name': 'Sixth Tone',
-        'rss_url': 'https://www.sixthtone.com/rss',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.sixthtone.com/',
     }
+    # ,
+    # {
+    #     'name': 'South China Morning Post',
+    #     'rss_url': 'https://www.scmp.com/rss/91/feed',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser', 'selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.scmp.com/',
+    # },
+    # {
+    #     'name': 'China Daily',
+    #     'rss_url': 'http://www.chinadaily.com.cn/rss/china_rss.xml',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.chinadaily.com.cn/',
+    # },
+    # {
+    #     'name': 'Sixth Tone',
+    #     'rss_url': 'https://www.sixthtone.com/rss',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser', 'selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.sixthtone.com/',
+    # }
 ]
 
 # ==============================================================================
@@ -782,10 +783,10 @@ def scrape_all():
             future = executor.submit(scrape_source_wrapper, source, session, proxies_dict)
             futures.append(future)
 
-        logging.info(f"Submitted {len(futures)} jobs to thread pool. Waiting up to 300s for completion...")
+        logging.info(f"Submitted {len(futures)} jobs to thread pool. Waiting up to 420s for completion...")
         
-        # 2. Wait for jobs to complete, with a 5-minute (300s) timeout
-        done, not_done = wait(futures, timeout=300)
+        # 2. Wait for jobs to complete, with a 5-minute (420s) timeout
+        done, not_done = wait(futures, timeout=420)
 
         # 3. Process completed jobs
         for future in done:

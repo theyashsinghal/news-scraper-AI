@@ -405,7 +405,7 @@ def get_cluster_id_for_article(new_title, new_summary):
             return str(uuid.uuid4())
 
         # Limit char count for embedding to speed up
-        limit_chars = 2000
+        limit_chars = 700
 
         # Prepare data and convert to Embeddings
         # Casting to list to prevent RuntimeError during thread modifications

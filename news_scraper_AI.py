@@ -21,6 +21,17 @@ SHEET_NAME = 'News Scrapper AI'
 WORKSHEET_NAME = 'Sheet1'
 # ==============================================================================
 
+import os
+# --- FATAL FIX: Prevent PyTorch CPU deadlocks in multithreaded environments ---
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+# ------------------------------------------------------------------------------
+
+import socket
+# --- FATAL FIX: Prevent underlying gspread/requests from hanging indefinitely ---
+socket.setdefaulttimeout(15)
+# ------------------------------------------------------------------------------
+
 import requests
 import urllib3
 from requests.adapters import HTTPAdapter
@@ -30,7 +41,6 @@ import trafilatura
 import time
 import logging
 import json
-import os
 import uuid
 import threading
 from concurrent.futures import ThreadPoolExecutor, wait
@@ -137,7 +147,7 @@ def create_selenium_driver():
 
     try:
         options = ChromeOptions()
-        # --- FATAL FIX: Eager Loading Strategy ---
+        # --- Eager Loading Strategy ---
         # Tells Selenium to stop waiting once the HTML is loaded, ignoring slow images/ads
         options.page_load_strategy = 'eager'
         # ---------------------------------------
@@ -146,22 +156,17 @@ def create_selenium_driver():
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument(f"user-agent={random.choice(BROWSER_USER_AGENTS)}")
-        # FIX 2: Added Chrome flags to prevent renderer timeout issues seen with Chrome 145+
-        # on GitHub Actions runners. Fixes "Timed out receiving message from renderer" errors.
         options.add_argument("--disable-features=VizDisplayCompositor")
         options.add_argument("--renderer-process-limit=1")
 
         if PROXY_SETTINGS["use_proxies"] and PROXY_SETTINGS["proxy_url"]:
             options.add_argument(f"--proxy-server={PROXY_SETTINGS['proxy_url']}")
 
-        # --- FATAL FIX: Force explicit Chrome binary path from GitHub Action ---
         chrome_bin = os.environ.get('CHROME_BIN')
         if chrome_bin:
             options.binary_location = chrome_bin
-        # -----------------------------------------------------------------------
 
         driver = webdriver.Chrome(options=options)
-        # --- FATAL FIX: Drastically lowered page load timeout from 20s to 7s ---
         driver.set_page_load_timeout(7) 
         logging.info("Selenium driver initialized successfully (Eager load strategy, 7s timeout).")
         return driver
@@ -238,14 +243,6 @@ SOURCE_CONFIG = [
         'article_url_contains': '.cms',
         'referer': 'https://economictimes.indiatimes.com/',
     },
-    # {
-    #     'name': 'AP News',
-    #     'rss_url': 'https://newsatme.com/go/ap/rss',
-    #     'rss_headers_type': 'browser',
-    #     'article_strategies': ['requests_browser'],
-    #     'article_url_contains': None,
-    #     'referer': 'https://apnews.com/',
-    # },
     {
         'name': 'South China Morning Post',
         'rss_url': 'https://www.scmp.com/rss/91/feed',
@@ -278,7 +275,6 @@ SOURCE_CONFIG = [
 semantic_model = None
 if SentenceTransformer is not None:
     try:
-        # FIX 3: Removed stale comment referencing L4 model.
         logging.info("Loading AI Semantic Model (all-MiniLM-L6-v2)...")
         semantic_model = SentenceTransformer('all-MiniLM-L6-v2')
         logging.info("AI Model loaded successfully.")
@@ -292,6 +288,7 @@ if SentenceTransformer is not None:
 # ==============================================================================
 sheet = None
 sheet_lock = threading.Lock() # Locks access to the Google Sheet upload
+ai_lock = threading.Lock()    # Locks access to PyTorch execution to prevent deadlocks
 existing_urls_cache = set()   # Memory cache for fast deduplication
 recent_articles_cache = []    # Memory cache for AI clustering
 MAX_ID = 0                    # Global counter for sequential IDs
@@ -411,9 +408,9 @@ def get_cluster_id_for_article(new_title, new_summary):
         limit_chars = 2000
 
         # Prepare data and convert to Embeddings
-        # Note: 'content' in JSON maps to 'summary' in logic
-        existing_texts = [f"{a['title']}. {a['content'][:limit_chars]}" for a in recent_articles_cache]
-        existing_ids = [a['cluster_id'] for a in recent_articles_cache]
+        # Casting to list to prevent RuntimeError during thread modifications
+        existing_texts = [f"{a['title']}. {a['content'][:limit_chars]}" for a in list(recent_articles_cache)]
+        existing_ids = [a['cluster_id'] for a in list(recent_articles_cache)]
         
         # Same for the new text
         new_text = f"{new_title}. {new_summary[:limit_chars]}"
@@ -431,9 +428,6 @@ def get_cluster_id_for_article(new_title, new_summary):
                 best_score = score
                 best_idx = i
 
-        # FIX 4: Raised threshold from 0.70 to 0.82 to prevent false positive clustering.
-        # At 0.82+, only near-identical articles cluster. Borderline paraphrases are
-        # intentionally left as separate entries since false positives are not acceptable.
         THRESHOLD = 0.82
         
         if best_score >= THRESHOLD:
@@ -478,17 +472,16 @@ def save_article(source, title, url, summary, image_url):
             image_url = "No image available"
         # ----------------------------
 
-        # --- THREAD-SAFE BLOCK ---
+        # --- FATAL FIX: Separate AI logic from Google Sheets lock to prevent deadlocks ---
+        with ai_lock:
+            cluster_id = get_cluster_id_for_article(title, summary)
+
+        # --- THREAD-SAFE DB BLOCK ---
         with sheet_lock:
             # First, check if the URL already exists (the primary skip)
             if url in existing_urls_cache:
                 logging.info(f"Duplicate article skipped: {title} from {source}")
                 return False 
-            
-            # --- Get Cluster ID ---
-            # Use the already cleaned/validated summary for clustering
-            cluster_id = get_cluster_id_for_article(title, summary)
-            # ----------------------
 
             # Increment ID strictly inside the lock
             MAX_ID += 1
@@ -509,8 +502,12 @@ def save_article(source, title, url, summary, image_url):
             # Truncate if needed
             safe_json = truncate_to_fit(article_obj)
             
-            # Upload to Sheet
-            sheet.append_row([safe_json])
+            try:
+                # Upload to Sheet
+                sheet.append_row([safe_json])
+            except Exception as sheet_err:
+                logging.error(f"Google Sheets API failed during append_row: {sheet_err}")
+                return False
             
             # Update Caches immediately
             existing_urls_cache.add(url)
@@ -521,10 +518,6 @@ def save_article(source, title, url, summary, image_url):
             })
 
         # -------------------------
-        # FIX 5: Moved sleep OUTSIDE the lock.
-        # Previously sleep(2.0) was inside the with sheet_lock block, which held the lock
-        # for 2 full seconds on every save and completely serialized all 12 threads.
-        # Now only the actual sheet write holds the lock; sleep happens after release.
         time.sleep(2.0)
         
         # Explicit LOGGING as requested
@@ -554,7 +547,6 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     try:
         # 1. Get RSS Feed
         rss_headers = get_headers(source_config['rss_headers_type'])
-        # --- FATAL FIX: Lowered request timeout from 20s to 7s ---
         response = session.get(rss_url, headers=rss_headers, timeout=7, proxies=proxies_dict)  
         response.raise_for_status()
         
@@ -620,7 +612,6 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             article_headers = get_headers(header_type)
                             article_headers['Referer'] = source_config['referer']
                             
-                            # --- FATAL FIX: Lowered request timeout from 20s to 7s ---
                             page_response = session.get(article_url, headers=article_headers, timeout=7, proxies=proxies_dict)
                             page_response.raise_for_status()
                             raw_html = page_response.text

@@ -233,14 +233,14 @@ SOURCE_CONFIG = [
         'article_url_contains': '.cms',
         'referer': 'https://economictimes.indiatimes.com/',
     },
-    {
-        'name': 'AP News',
-        'rss_url': 'https://newsatme.com/go/ap/rss',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://apnews.com/',
-    },
+    # {
+    #     'name': 'AP News',
+    #     'rss_url': 'https://newsatme.com/go/ap/rss',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://apnews.com/',
+    # },
     {
         'name': 'South China Morning Post',
         'rss_url': 'https://www.scmp.com/rss/91/feed',

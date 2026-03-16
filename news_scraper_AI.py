@@ -326,7 +326,7 @@ def init_google_sheets():
 
         logging.info(f"Loaded {len(raw_column_data)} rows from sheet.")
         
-        cutoff_date = datetime.now() - timedelta(days=2)
+        cutoff_date = datetime.now() - timedelta(days=1)
         
         for cell_value in raw_column_data:
             if not cell_value: continue

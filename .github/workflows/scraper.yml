@@ -35,6 +35,7 @@ jobs:
       # install-chrome: true forces the action to install its own Chrome, overriding the runner's.
       # set-path: true forces the runner to use these versions over the system defaults.
       - name: Setup Chrome
+        id: setup-chrome  # <-- Added ID to grab the exact path
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
@@ -58,6 +59,8 @@ jobs:
         env:
           # Inject the Secret Key for Google Sheets
           GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+          # Pass the explicit Chrome binary path to Python
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: |
           python news_scraper_AI.py
 

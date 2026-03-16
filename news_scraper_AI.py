@@ -137,6 +137,10 @@ def create_selenium_driver():
 
     try:
         options = ChromeOptions()
+        # --- FATAL FIX: Eager Loading Strategy ---
+        # Tells Selenium to stop waiting once the HTML is loaded, ignoring slow images/ads
+        options.page_load_strategy = 'eager'
+        # ---------------------------------------
         options.add_argument("--headless=new")
         options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
@@ -157,8 +161,9 @@ def create_selenium_driver():
         # -----------------------------------------------------------------------
 
         driver = webdriver.Chrome(options=options)
-        driver.set_page_load_timeout(20)
-        logging.info("Selenium driver initialized successfully.")
+        # --- FATAL FIX: Drastically lowered page load timeout from 20s to 7s ---
+        driver.set_page_load_timeout(7) 
+        logging.info("Selenium driver initialized successfully (Eager load strategy, 7s timeout).")
         return driver
     except WebDriverException as e:
         logging.critical(f"Failed to initialize Selenium driver. Error: {e}")
@@ -549,7 +554,8 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     try:
         # 1. Get RSS Feed
         rss_headers = get_headers(source_config['rss_headers_type'])
-        response = session.get(rss_url, headers=rss_headers, timeout=20, proxies=proxies_dict)  
+        # --- FATAL FIX: Lowered request timeout from 20s to 7s ---
+        response = session.get(rss_url, headers=rss_headers, timeout=7, proxies=proxies_dict)  
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'xml')
@@ -614,7 +620,8 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             article_headers = get_headers(header_type)
                             article_headers['Referer'] = source_config['referer']
                             
-                            page_response = session.get(article_url, headers=article_headers, timeout=20, proxies=proxies_dict)
+                            # --- FATAL FIX: Lowered request timeout from 20s to 7s ---
+                            page_response = session.get(article_url, headers=article_headers, timeout=7, proxies=proxies_dict)
                             page_response.raise_for_status()
                             raw_html = page_response.text
                         
@@ -623,16 +630,20 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                                 logging.error(f"[{name}] Selenium strategy selected but driver is not available. Skipping.")
                                 continue
                             
-                            selenium_driver.get(article_url)
-                            
-                            # Use Explicit Wait
                             try:
-                                WebDriverWait(selenium_driver, 10).until(
+                                selenium_driver.get(article_url)
+                            except TimeoutException:
+                                logging.warning(f"[{name}] Page get timed out (7s). Proceeding to grab partial source anyway.")
+                                pass # Eager load may trigger a timeout but still have DOM
+                            
+                            # Use Explicit Wait - lowered to 3s because 'eager' should be fast
+                            try:
+                                WebDriverWait(selenium_driver, 3).until(
                                     EC.presence_of_element_located((By.TAG_NAME, "p"))
                                 )
                                 logging.info(f"[{name}] Page content loaded.")
                             except TimeoutException:
-                                logging.warning(f"[{name}] Page timed out (10s). Proceeding anyway.")
+                                logging.warning(f"[{name}] Page explicit wait timed out (3s). Proceeding anyway.")
                                 
                             raw_html = selenium_driver.page_source
                         

@@ -119,3 +119,11 @@ jobs:
           else
             echo "No changes to commit"
           fi
+
+      # --- TRIGGER THE REPHRASER INSTANTLY ---
+      - name: Trigger Rephraser Instantly
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.REPHRASER_PAT }}
+          repository: theyashsinghal/rephrased_news_articles
+          event-type: trigger-rephraser

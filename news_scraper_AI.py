@@ -58,10 +58,12 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # --- NEW: Imports for AI/Semantics ---
 try:
     from sentence_transformers import SentenceTransformer, util
+    import torch
 except ImportError:
-    logging.critical("sentence-transformers not installed. Run 'pip install sentence-transformers'. AI clustering will be skipped.")
+    logging.critical("sentence-transformers or torch not installed. Run 'pip install sentence-transformers'. AI clustering will be skipped.")
     SentenceTransformer = None
     util = None
+    torch = None
 # -------------------------------------
 
 # --- Imports for Selenium ---
@@ -79,9 +81,6 @@ except ImportError:
 # ---------------------------
 
 # --- Configure logging ---
-# FIX 1: Changed filemode from 'a' (append) to 'w' (overwrite).
-# Each run now gets a clean log. The workflow already saves logs with timestamps,
-# so no history is lost.
 logging.basicConfig(filename='news_scraper.log',
                     filemode='w',
                     level=logging.INFO,
@@ -147,10 +146,7 @@ def create_selenium_driver():
 
     try:
         options = ChromeOptions()
-        # --- Eager Loading Strategy ---
-        # Tells Selenium to stop waiting once the HTML is loaded, ignoring slow images/ads
         options.page_load_strategy = 'eager'
-        # ---------------------------------------
         options.add_argument("--headless=new")
         options.add_argument("--disable-gpu")
         options.add_argument("--no-sandbox")
@@ -178,7 +174,10 @@ def create_selenium_driver():
         return None
 
 # --- Central Source Configuration ---
+# 17 Indian/Tech feeds added with dynamic quotas (max 10 articles each).
+# Existing feeds modified: The Dawn, Al Jazeera, and The Guardian restricted to max 2.
 SOURCE_CONFIG = [
+    # --- Existing Core Feeds ---
     {
         'name': 'BBC',
         'rss_url': 'http://feeds.bbci.co.uk/news/world/rss.xml',
@@ -202,6 +201,7 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser'],
         'article_url_contains': None,
         'referer': 'https://www.theguardian.com/',
+        'max_articles': 2  # Restricted quota
     },
     {
         'name': 'The Hindu',
@@ -218,6 +218,7 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': None,
         'referer': 'https://www.dawn.com/',
+        'max_articles': 2  # Restricted quota
     },
     {
         'name': 'Al Jazeera',
@@ -226,6 +227,7 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': None,
         'referer': 'https://www.aljazeera.com/',
+        'max_articles': 2  # Restricted quota
     },
     {
         'name': 'TechCrunch',
@@ -242,32 +244,162 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': '.cms',
         'referer': 'https://economictimes.indiatimes.com/',
+    },
+
+    # --- NEW ADDITIONS (10 Articles Quota Each) ---
+    {
+        'name': 'Wired',
+        'rss_url': 'https://www.wired.com/feed/rss',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.wired.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'NDTV',
+        'rss_url': 'https://feeds.feedburner.com/ndtvnews-top-stories',
+        'rss_headers_type': 'feedfetcher',
+        'article_strategies': ['requests_browser', 'selenium_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.ndtv.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'Indian Express',
+        'rss_url': 'https://indianexpress.com/feed/',
+        'rss_headers_type': 'feedfetcher',
+        'article_strategies': ['selenium_browser'],
+        'article_url_contains': None,
+        'referer': 'https://indianexpress.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'Deccan Herald',
+        'rss_url': 'https://www.deccanherald.com/feeds/nation.rss',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.deccanherald.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'The Tribune',
+        'rss_url': 'https://www.tribuneindia.com/rss/news/nation',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.tribuneindia.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'The Telegraph',
+        'rss_url': 'https://www.telegraphindia.com/rss/feed',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.telegraphindia.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'Onmanorama',
+        'rss_url': 'https://www.onmanorama.com/rss/news.xml',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.onmanorama.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'EastMojo',
+        'rss_url': 'https://www.eastmojo.com/feed/',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.eastmojo.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'The Assam Tribune',
+        'rss_url': 'https://assamtribune.com/feed/',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://assamtribune.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'Odisha Bytes',
+        'rss_url': 'https://odishabytes.com/feed/',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://odishabytes.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'The South First',
+        'rss_url': 'https://thesouthfirst.com/feed/',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://thesouthfirst.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'Telangana Today',
+        'rss_url': 'https://telanganatoday.com/feed',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://telanganatoday.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'Greater Kashmir',
+        'rss_url': 'https://www.greaterkashmir.com/feed/',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.greaterkashmir.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'DT Next',
+        'rss_url': 'https://www.dtnext.in/feed/',
+        'rss_headers_type': 'browser',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.dtnext.in/',
+        'max_articles': 10
+    },
+    {
+        'name': 'Livemint',
+        'rss_url': 'https://www.livemint.com/rss/news',
+        'rss_headers_type': 'feedfetcher',
+        'article_strategies': ['selenium_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.livemint.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'Firstpost',
+        'rss_url': 'https://www.firstpost.com/rss/news.xml',
+        'rss_headers_type': 'feedfetcher',
+        'article_strategies': ['requests_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.firstpost.com/',
+        'max_articles': 10
+    },
+    {
+        'name': 'India Today',
+        'rss_url': 'https://www.indiatoday.in/rss/home',
+        'rss_headers_type': 'feedfetcher',
+        'article_strategies': ['selenium_browser'],
+        'article_url_contains': None,
+        'referer': 'https://www.indiatoday.in/',
+        'max_articles': 10
     }
-    # ,
-    # {
-    #     'name': 'South China Morning Post',
-    #     'rss_url': 'https://www.scmp.com/rss/91/feed',
-    #     'rss_headers_type': 'browser',
-    #     'article_strategies': ['requests_browser', 'selenium_browser'],
-    #     'article_url_contains': None,
-    #     'referer': 'https://www.scmp.com/',
-    # },
-    # {
-    #     'name': 'China Daily',
-    #     'rss_url': 'http://www.chinadaily.com.cn/rss/china_rss.xml',
-    #     'rss_headers_type': 'browser',
-    #     'article_strategies': ['requests_browser'],
-    #     'article_url_contains': None,
-    #     'referer': 'https://www.chinadaily.com.cn/',
-    # },
-    # {
-    #     'name': 'Sixth Tone',
-    #     'rss_url': 'https://www.sixthtone.com/rss',
-    #     'rss_headers_type': 'browser',
-    #     'article_strategies': ['requests_browser', 'selenium_browser'],
-    #     'article_url_contains': None,
-    #     'referer': 'https://www.sixthtone.com/',
-    # }
 ]
 
 # ==============================================================================
@@ -291,11 +423,11 @@ sheet = None
 sheet_lock = threading.Lock() # Locks access to the Google Sheet upload
 ai_lock = threading.Lock()    # Locks access to PyTorch execution to prevent deadlocks
 existing_urls_cache = set()   # Memory cache for fast deduplication
-recent_articles_cache = []    # Memory cache for AI clustering
+recent_articles_cache = []    # Memory cache for AI clustering with pre-computed embeddings
 MAX_ID = 0                    # Global counter for sequential IDs
 
 def init_google_sheets():
-    """Initializes connection to Google Sheets and loads existing data into memory."""
+    """Initializes connection to Google Sheets and loads the last 1200 rows to warm up caches instantly."""
     global sheet, existing_urls_cache, recent_articles_cache, MAX_ID
     
     try:
@@ -310,36 +442,44 @@ def init_google_sheets():
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
         
-        # Open the specific worksheet
         sheet = client.open(SHEET_NAME).worksheet(WORKSHEET_NAME)
         logging.info(f"Connected to Sheet: {SHEET_NAME} / {WORKSHEET_NAME}")
         
-        # --- CACHE WARMUP ---
-        # Fetch ALL data from Column A to build our local cache
-        logging.info("Fetching existing data to build cache...")
+        # --- HIGH-SPEED RANGE CACHE WARMUP ---
+        # Fetch only the last 1200 rows to bypass downloading heavy full-text JSON payloads
+        total_allocated_rows = sheet.row_count
+        start_row = max(1, total_allocated_rows - 1200)
+        range_str = f"A{start_row}:A{total_allocated_rows}"
+        logging.info(f"Fetching range {range_str} to warm up caches...")
         
-        # Get all values in column 1 (A)
         try:
-            raw_column_data = sheet.col_values(1)
+            raw_cells = sheet.get(range_str)
+            raw_column_data = [cell[0] for cell in raw_cells if cell]
         except Exception as e:
-            logging.error(f"Failed to fetch column values: {e}")
-            raw_column_data = []
+            logging.error(f"Failed to fetch range values: {e}. Trying full column fallback.")
+            try:
+                raw_column_data = sheet.col_values(1)
+            except Exception as e_full:
+                logging.error(f"Failed to fetch full column: {e_full}")
+                raw_column_data = []
 
-        logging.info(f"Loaded {len(raw_column_data)} rows from sheet.")
+        logging.info(f"Loaded {len(raw_column_data)} rows from sheet range.")
         
         cutoff_date = datetime.now() - timedelta(days=1)
+        temp_recent_texts = []
+        temp_recent_items = []
         
         for cell_value in raw_column_data:
-            if not cell_value: continue
+            if not cell_value: 
+                continue
             try:
-                # Parse JSON from cell
                 article_data = json.loads(cell_value)
                 
-                # 1. Populate URL cache (Deduplication)
+                # 1. Populate URL cache
                 if 'url' in article_data:
                     existing_urls_cache.add(article_data['url'])
                 
-                # --- NEW: Update Max ID ---
+                # 2. Update Max ID
                 if 'id' in article_data:
                     try:
                         current_id = int(article_data['id'])
@@ -347,25 +487,38 @@ def init_google_sheets():
                             MAX_ID = current_id
                     except ValueError:
                         pass
-                # --------------------------
 
-                # 2. Populate AI Cache (Only recent articles)
+                # 3. Queue for AI Cache (Only last 24h)
                 if 'scraped_at' in article_data and 'title' in article_data and 'content' in article_data:
-                    # Handle different date formats if necessary, assuming ISO or string default
                     try:
                         scraped_date = datetime.strptime(str(article_data['scraped_at']).split('.')[0], "%Y-%m-%d %H:%M:%S")
                         if scraped_date >= cutoff_date:
-                            recent_articles_cache.append({
+                            temp_recent_items.append({
                                 'title': article_data['title'],
                                 'content': article_data['content'],
                                 'cluster_id': article_data.get('cluster_id')
                             })
-                    except:
-                        # If date parsing fails, just ignore for AI cache
+                            limit_chars = 700
+                            temp_recent_texts.append(f"{article_data['title']}. {article_data['content'][:limit_chars]}")
+                    except Exception:
                         pass
                         
             except json.JSONDecodeError:
                 continue
+
+        # Batch pre-calculate initial cached embeddings
+        if temp_recent_texts and semantic_model is not None:
+            logging.info(f"Pre-calculating embeddings for {len(temp_recent_texts)} cached articles...")
+            try:
+                embeddings = semantic_model.encode(temp_recent_texts, convert_to_tensor=True)
+                for i, item in enumerate(temp_recent_items):
+                    item['embedding'] = embeddings[i]
+                    recent_articles_cache.append(item)
+            except Exception as e_embed:
+                logging.error(f"Failed to batch-encode startup cache: {e_embed}")
+                # Fall back without embeddings
+                for item in temp_recent_items:
+                    recent_articles_cache.append(item)
 
         logging.info(f"Cache built: {len(existing_urls_cache)} URLs. Current MAX_ID: {MAX_ID}")
 
@@ -396,28 +549,25 @@ def truncate_to_fit(article_obj):
 # ==============================================================================
 
 def get_cluster_id_for_article(new_title, new_summary):
-    """Checks DB for similar articles and assigns a cluster_id."""
-    if semantic_model is None or util is None:
-        return str(uuid.uuid4())
+    """Checks DB for similar articles and assigns a cluster_id (High-Speed O(1) Vector Stack comparison)."""
+    if semantic_model is None or util is None or torch is None:
+        return str(uuid.uuid4()), None
 
     try:
         # Use the cache populated at startup
-        if not recent_articles_cache:
-            return str(uuid.uuid4())
-
-        # Limit char count for embedding to speed up
-        limit_chars = 700
-
-        # Prepare data and convert to Embeddings
-        # Casting to list to prevent RuntimeError during thread modifications
-        existing_texts = [f"{a['title']}. {a['content'][:limit_chars]}" for a in list(recent_articles_cache)]
-        existing_ids = [a['cluster_id'] for a in list(recent_articles_cache)]
+        cache_list = list(recent_articles_cache)
+        valid_items = [a for a in cache_list if 'embedding' in a]
         
-        # Same for the new text
+        limit_chars = 700
         new_text = f"{new_title}. {new_summary[:limit_chars]}"
-
-        existing_embeddings = semantic_model.encode(existing_texts, convert_to_tensor=True)
         new_embedding = semantic_model.encode(new_text, convert_to_tensor=True)
+
+        if not valid_items:
+            return str(uuid.uuid4()), new_embedding
+
+        # Prepare stacked tensors instantly without re-encoding
+        existing_embeddings = torch.stack([a['embedding'] for a in valid_items])
+        existing_ids = [a['cluster_id'] for a in valid_items]
 
         # Calculate Cosine Similarity
         cosine_scores = util.cos_sim(new_embedding, existing_embeddings)[0]
@@ -426,31 +576,30 @@ def get_cluster_id_for_article(new_title, new_summary):
         best_idx = -1
         for i, score in enumerate(cosine_scores):
             if score > best_score:
-                best_score = score
+                best_score = score.item()
                 best_idx = i
 
         THRESHOLD = 0.82
         
         if best_score >= THRESHOLD:
             logging.info(f"DEDUPLICATION: Found match (Score: {best_score:.2f}). Linking to Cluster ID: {existing_ids[best_idx]}")
-            return existing_ids[best_idx]
+            return existing_ids[best_idx], new_embedding
         else:
-            return str(uuid.uuid4())
+            return str(uuid.uuid4()), new_embedding
             
     except Exception as e:
         logging.error(f"Error during AI clustering calculation: {e}")
-        return str(uuid.uuid4())
+        return str(uuid.uuid4()), None
 
 
 def save_article(source, title, url, summary, image_url):
     """
     Saves a single article to the database. 
-    INCLUDES: The strict 90-word minimum length check.
+    INCLUDES: The strict 90-word minimum length check & Google Sheets Infinite Retry Loop.
     """
     global existing_urls_cache, recent_articles_cache, MAX_ID
     
     # --- STEP 0: STRICT GLOBAL WORD COUNT CHECK ---
-    # Calculates word count on the final summary (whether full article or RSS fallback)
     if not summary:
         final_word_count = 0
     else:
@@ -462,29 +611,25 @@ def save_article(source, title, url, summary, image_url):
     if final_word_count < MIN_SUMMARY_WORDS:
         logging.warning(f"SKIPPED (GLOBAL WORD LIMIT): Article '{title}' from {source} has only {final_word_count} words (Min: {MIN_SUMMARY_WORDS}).")
         return False
-    # ---------------------------------------------
     
     try:
-        # --- MORE ROBUST CLEANING (already performed partial cleanup for word count) ---
         title = " ".join(title.replace('\n', ' ').replace('\r', ' ').split()).strip()
         summary = cleaned_summary # Use the cleaned summary from above
         
         if not image_url:
             image_url = "No image available"
-        # ----------------------------
 
-        # --- FATAL FIX: Separate AI logic from Google Sheets lock to prevent deadlocks ---
+        # --- AI PASS: Calculate embedding and cluster_id under thread-safe lock ---
         with ai_lock:
-            cluster_id = get_cluster_id_for_article(title, summary)
+            cluster_id, new_embedding = get_cluster_id_for_article(title, summary)
 
-        # --- THREAD-SAFE DB BLOCK ---
+        # --- THREAD-SAFE DB WRITE BLOCK ---
         with sheet_lock:
-            # First, check if the URL already exists (the primary skip)
+            # Check duplicate URL
             if url in existing_urls_cache:
                 logging.info(f"Duplicate article skipped: {title} from {source}")
                 return False 
 
-            # Increment ID strictly inside the lock
             MAX_ID += 1
             new_id = MAX_ID
 
@@ -495,33 +640,35 @@ def save_article(source, title, url, summary, image_url):
                 "source": source,
                 "title": title,
                 "url": url,
-                "content": summary, # Map summary to 'content'
+                "content": summary,
                 "image_url": image_url,
                 "scraped_at": str(datetime.now())
             }
 
-            # Truncate if needed
+            # Truncate to fit cell limits if needed
             safe_json = truncate_to_fit(article_obj)
             
-            try:
-                # Upload to Sheet
-                sheet.append_row([safe_json])
-            except Exception as sheet_err:
-                logging.error(f"Google Sheets API failed during append_row: {sheet_err}")
-                return False
+            # --- GOOGLE SHEETS INFINITE RETRY LOOP ---
+            while True:
+                try:
+                    sheet.append_row([safe_json])
+                    break # Success! Exit retry loop
+                except Exception as sheet_err:
+                    logging.warning(f"Google Sheets API failed during append_row: {sheet_err}. Retrying in 20 seconds...")
+                    time.sleep(20)
             
             # Update Caches immediately
             existing_urls_cache.add(url)
-            recent_articles_cache.append({
+            cache_entry = {
                 'title': title, 
                 'content': summary, 
                 'cluster_id': cluster_id
-            })
+            }
+            if new_embedding is not None:
+                cache_entry['embedding'] = new_embedding
+            recent_articles_cache.append(cache_entry)
 
-        # -------------------------
-        time.sleep(2.0)
-        
-        # Explicit LOGGING as requested
+        # Explicit LOGGING of successful saves
         logging.info(f">>> SUCCESSFULLY SAVED [ID: {new_id}] - {title} from {source} ({final_word_count} words)")
         print(f"Saved: {title} [ID: {new_id}]") 
         return True
@@ -531,12 +678,11 @@ def save_article(source, title, url, summary, image_url):
         return False
 
 
-# --- RE-ARCHITECTED: Generic Scraper Function with Strategy Loop ---
+# --- Generic Scraper Function with Dynamic Quota Handling ---
 def scrape_source(session, selenium_driver, source_config, proxies_dict):
     """
     A generic function that scrapes any source based on its config.
-    It will try every strategy in `article_strategies` to get the full text
-    before falling back to the RSS summary.
+    Applies per-source custom article limits dynamically.
     """
     name = source_config['name']
     rss_url = source_config['rss_url']
@@ -553,14 +699,17 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
         
         soup = BeautifulSoup(response.content, 'xml')
         items = soup.find_all('item')
-        logging.info(f"Found {len(items)} articles in {name} RSS feed. Processing until {MAX_ARTICLES_PER_SOURCE} new articles are saved.")
+        
+        # --- Dynamic Quota Calculation ---
+        max_quota = source_config.get('max_articles', MAX_ARTICLES_PER_SOURCE)
+        logging.info(f"Found {len(items)} articles in {name} RSS feed. Processing until {max_quota} new articles are saved.")
 
         # 2. Process each article
         for item in items:
             
             # Stop processing if we have successfully saved our target quota
-            if len(articles_saved_list) >= MAX_ARTICLES_PER_SOURCE:
-                 logging.info(f"[{name}] Target reached: Successfully saved {MAX_ARTICLES_PER_SOURCE} new articles.")
+            if len(articles_saved_list) >= max_quota:
+                 logging.info(f"[{name}] Target reached: Successfully saved {max_quota} new articles.")
                  break
 
             article_url = None
@@ -579,22 +728,19 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     continue
                 
                 # --- Early Skip Check ---
-                # Check cache instead of DB
                 if article_url in existing_urls_cache:
                     logging.info(f"[{name}] Early skip: URL {article_url} already exists.")
                     time.sleep(0.001)
                     continue
-                # -------------------------
 
                 rss_title = item.title.text if item.title else "Title not found"
                 
                 # Get the raw RSS description now, for potential fallback later
                 if item.description:
-                    # Use BeautifulSoup to strip any HTML from the RSS description
                     summary_soup = BeautifulSoup(item.description.text, 'html.parser')
                     rss_description = summary_soup.get_text().strip()
                 
-                # --- NEW MULTI-STRATEGY LOGIC ---
+                # --- MULTI-STRATEGY LOGIC ---
                 summary = None
                 raw_html = None
                 final_title = rss_title
@@ -626,9 +772,8 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                                 selenium_driver.get(article_url)
                             except TimeoutException:
                                 logging.warning(f"[{name}] Page get timed out (7s). Proceeding to grab partial source anyway.")
-                                pass # Eager load may trigger a timeout but still have DOM
+                                pass
                             
-                            # Use Explicit Wait - lowered to 3s because 'eager' should be fast
                             try:
                                 WebDriverWait(selenium_driver, 3).until(
                                     EC.presence_of_element_located((By.TAG_NAME, "p"))
@@ -642,9 +787,8 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                         else:
                             logging.error(f"[{name}] Unknown strategy: {strategy}. Skipping.")
                             continue
-                        # --- END STRATEGY ROUTER ---
 
-                        # 4. Extract Content
+                        # Extract Content
                         if not raw_html:
                             logging.warning(f"[{name}] FAILED with '{strategy}' (HTML was empty).")
                             continue
@@ -667,7 +811,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             if og_image:
                                 image_url = og_image['content']
                                 
-                            break # <-- Success! Exit the strategy loop.
+                            break # Success! Exit strategy loop
                         else:
                             logging.warning(f"[{name}] FAILED with '{strategy}' (content was too short: {word_count} words).")
                     
@@ -677,14 +821,12 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     if i < len(strategies) - 1:
                         time.sleep(random.uniform(0.5, 1.0))
                 
-                # --- END OF STRATEGY LOOP ---
-
-                # 5. Final Summary Assignment (If all strategies failed, use the RSS description)
+                # Final Summary Assignment (If all strategies failed, use the RSS description)
                 if not summary:
                     logging.error(f"[{name}] All scrape strategies failed for {article_url}. Falling back to RSS description.")
                     summary = rss_description or "No content available"
 
-                # 6. Save (The save_article function now handles the final 90-word check)
+                # Save article
                 was_saved = save_article(name, final_title, article_url, summary, image_url)
                 if was_saved:
                     articles_saved_list.append(final_title)
@@ -702,7 +844,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
     return (name, len(articles_saved_list))
 
 
-# --- NEW: Thread Wrapper Function ---
+# --- Thread Wrapper Function ---
 def scrape_source_wrapper(source, session, proxies_dict):
     """
     A wrapper function to be run in a separate thread.
@@ -751,7 +893,7 @@ def scrape_source_wrapper(source, session, proxies_dict):
                     logging.error(f"[{name}] (Thread) driver.quit() failed, but PID was not found. A zombie process may remain.")
             
 
-# --- REFACTORED: scrape_all() ---
+# --- scrape_all() ---
 def scrape_all():
     """Runs all scraping jobs defined in SOURCE_CONFIG in parallel."""
     logging.info("--- Starting new scraping job (Parallel Mode) ---")
@@ -785,7 +927,7 @@ def scrape_all():
 
         logging.info(f"Submitted {len(futures)} jobs to thread pool. Waiting up to 420s for completion...")
         
-        # 2. Wait for jobs to complete, with a 5-minute (420s) timeout
+        # 2. Wait for jobs to complete, with a 7-minute (420s) timeout
         done, not_done = wait(futures, timeout=420)
 
         # 3. Process completed jobs
@@ -799,7 +941,7 @@ def scrape_all():
         
         # 4. Handle jobs that timed out
         if not_done:
-            logging.critical(f"--- TIMEOUT: {len(not_done)} scrape jobs did not complete in 300s. ---")
+            logging.critical(f"--- TIMEOUT: {len(not_done)} scrape jobs did not complete in 420s. ---")
             for future in not_done:
                 logging.error("A thread has timed out and will be abandoned.")
                 all_counts["Timed_Out_Jobs"] = all_counts.get("Timed_Out_Jobs", 0) + 1

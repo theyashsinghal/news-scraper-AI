@@ -3,10 +3,12 @@ on:
   schedule:
     - cron: '*/30 * * * *'  # Run every 30 minutes
   workflow_dispatch:      # Manual trigger
-# Prevent multiple instances from running simultaneously
+
+# Prevent multiple instances from running simultaneously by canceling the previous active run
 concurrency:
-  group: news-scraper
-  cancel-in-progress: false
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   scrape_news:
     runs-on: ubuntu-latest

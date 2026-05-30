@@ -251,7 +251,7 @@ SOURCE_CONFIG = [
         'name': 'Wired',
         'rss_url': 'https://www.wired.com/feed/rss',
         'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
+        'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': None,
         'referer': 'https://www.wired.com/',
         'max_articles': 10
@@ -276,34 +276,34 @@ SOURCE_CONFIG = [
     },
     {
         'name': 'Deccan Herald',
-        'rss_url': 'https://www.deccanherald.com/feeds/nation.rss',
+        'rss_url': 'https://news.google.com/rss/search?q=site:deccanherald.com',
         'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
+        'article_strategies': ['selenium_browser'],
         'article_url_contains': None,
-        'referer': 'https://www.deccanherald.com/',
+        'referer': 'https://news.google.com/',
         'max_articles': 10
     },
     {
         'name': 'The Tribune',
-        'rss_url': 'https://www.tribuneindia.com/rss/news/nation',
+        'rss_url': 'https://news.google.com/rss/search?q=site:tribuneindia.com',
         'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
+        'article_strategies': ['selenium_browser'],
         'article_url_contains': None,
-        'referer': 'https://www.tribuneindia.com/',
+        'referer': 'https://news.google.com/',
         'max_articles': 10
     },
     {
         'name': 'The Telegraph',
-        'rss_url': 'https://www.telegraphindia.com/rss/feed',
+        'rss_url': 'https://news.google.com/rss/search?q=site:telegraphindia.com',
         'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
+        'article_strategies': ['selenium_browser'],
         'article_url_contains': None,
-        'referer': 'https://www.telegraphindia.com/',
+        'referer': 'https://news.google.com/',
         'max_articles': 10
     },
     {
         'name': 'Onmanorama',
-        'rss_url': 'https://www.onmanorama.com/rss/news.xml',
+        'rss_url': 'https://www.onmanorama.com/news/india.feeds.onmrss.xml',
         'rss_headers_type': 'browser',
         'article_strategies': ['requests_browser'],
         'article_url_contains': None,
@@ -384,8 +384,8 @@ SOURCE_CONFIG = [
     },
     {
         'name': 'Firstpost',
-        'rss_url': 'https://www.firstpost.com/rss/news.xml',
-        'rss_headers_type': 'feedfetcher',
+        'rss_url': 'https://www.firstpost.com/commonfeeds/v1/mfp/rss/india.xml',
+        'rss_headers_type': 'browser',
         'article_strategies': ['requests_browser'],
         'article_url_contains': None,
         'referer': 'https://www.firstpost.com/',
@@ -770,6 +770,9 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             
                             try:
                                 selenium_driver.get(article_url)
+                                resolved_url = selenium_driver.current_url
+                                if resolved_url and "news.google.com" not in resolved_url:
+                                    article_url = resolved_url
                             except TimeoutException:
                                 logging.warning(f"[{name}] Page get timed out (7s). Proceeding to grab partial source anyway.")
                                 pass

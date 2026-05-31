@@ -182,7 +182,7 @@ SOURCE_CONFIG = [
         'name': 'BBC',
         'rss_url': 'http://feeds.bbci.co.uk/news/world/rss.xml',
         'rss_headers_type': 'feedfetcher',
-        'article_strategies': ['requests_browser'],
+        'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': None,
         'referer': 'https://www.bbc.com/news',
     },
@@ -194,15 +194,15 @@ SOURCE_CONFIG = [
         'article_url_contains': '.cms',
         'referer': 'https://timesofindia.indiatimes.com/',
     },
-    {
-        'name': 'The Guardian',
-        'rss_url': 'https://www.theguardian.com/world/rss',
-        'rss_headers_type': 'feedfetcher',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.theguardian.com/',
-        'max_articles': 2  # Restricted quota
-    },
+    # {
+    #     'name': 'The Guardian',
+    #     'rss_url': 'https://www.theguardian.com/world/rss',
+    #     'rss_headers_type': 'feedfetcher',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.theguardian.com/',
+    #     'max_articles': 2  # Restricted quota
+    # },
     {
         'name': 'The Hindu',
         'rss_url': 'https://www.thehindu.com/news/national/feeder/default.rss',
@@ -211,15 +211,15 @@ SOURCE_CONFIG = [
         'article_url_contains': None,
         'referer': 'https://www.thehindu.com/',
     },
-    {
-        'name': 'The Dawn',
-        'rss_url': 'https://www.dawn.com/feeds/home',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser', 'selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.dawn.com/',
-        'max_articles': 2  # Restricted quota
-    },
+    # {
+    #     'name': 'The Dawn',
+    #     'rss_url': 'https://www.dawn.com/feeds/home',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser', 'selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.dawn.com/',
+    #     'max_articles': 1  # Restricted quota
+    # },
     {
         'name': 'Al Jazeera',
         'rss_url': 'https://www.aljazeera.com/xml/rss/all.xml',
@@ -227,7 +227,7 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': None,
         'referer': 'https://www.aljazeera.com/',
-        'max_articles': 2  # Restricted quota
+        'max_articles': 8  # Restricted quota
     },
     {
         'name': 'TechCrunch',
@@ -274,33 +274,33 @@ SOURCE_CONFIG = [
         'referer': 'https://indianexpress.com/',
         'max_articles': 10
     },
-    {
-        'name': 'Deccan Herald',
-        'rss_url': 'https://news.google.com/rss/search?q=site:deccanherald.com',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://news.google.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'The Tribune',
-        'rss_url': 'https://news.google.com/rss/search?q=site:tribuneindia.com',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://news.google.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'The Telegraph',
-        'rss_url': 'https://news.google.com/rss/search?q=site:telegraphindia.com',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://news.google.com/',
-        'max_articles': 10
-    },
+    # {
+    #     'name': 'Deccan Herald',
+    #     'rss_url': 'https://news.google.com/rss/search?q=site:deccanherald.com',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://news.google.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'The Tribune',
+    #     'rss_url': 'https://news.google.com/rss/search?q=site:tribuneindia.com',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://news.google.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'The Telegraph',
+    #     'rss_url': 'https://news.google.com/rss/search?q=site:telegraphindia.com',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://news.google.com/',
+    #     'max_articles': 10
+    # },
     {
         'name': 'Onmanorama',
         'rss_url': 'https://www.onmanorama.com/news/india.feeds.onmrss.xml',

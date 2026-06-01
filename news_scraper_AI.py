@@ -4,7 +4,7 @@
 # How many articles to get from each source (e.g., 5)
 # This is a 'quota'. The script will keep scanning the feed until it saves
 # this many NEW articles (or runs out of items).
-MAX_ARTICLES_PER_SOURCE = 30
+MAX_ARTICLES_PER_SOURCE = 20
 #
 # --- NEW: PROXY CONFIGURATION ---
 # Set 'use_proxies' to True to route all requests (Requests & Selenium)
@@ -184,6 +184,7 @@ SOURCE_CONFIG = [
         'rss_headers_type': 'feedfetcher',
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': None,
+        'max_articles': 10,
         'referer': 'https://www.bbc.com/news',
     },
     {
@@ -236,6 +237,7 @@ SOURCE_CONFIG = [
         'article_strategies': ['requests_browser'],
         'article_url_contains': None,
         'referer': 'https://techcrunch.com/',
+        'max_articles': 8
     },
     {
         'name': 'Economic Times',
@@ -243,7 +245,7 @@ SOURCE_CONFIG = [
         'rss_headers_type': 'feedfetcher',
         'article_strategies': ['requests_browser', 'selenium_browser'],
         'article_url_contains': '.cms',
-        'referer': 'https://economictimes.indiatimes.com/',
+        'referer': 'https://economictimes.indiatimes.com/'
     },
 
     # --- NEW ADDITIONS (10 Articles Quota Each) ---
@@ -301,105 +303,105 @@ SOURCE_CONFIG = [
     #     'referer': 'https://news.google.com/',
     #     'max_articles': 10
     # },
-    {
-        'name': 'Onmanorama',
-        'rss_url': 'https://www.onmanorama.com/news/india.feeds.onmrss.xml',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.onmanorama.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'EastMojo',
-        'rss_url': 'https://www.eastmojo.com/feed/',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.eastmojo.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'The Assam Tribune',
-        'rss_url': 'https://assamtribune.com/feed/',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://assamtribune.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'Odisha Bytes',
-        'rss_url': 'https://odishabytes.com/feed/',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://odishabytes.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'The South First',
-        'rss_url': 'https://thesouthfirst.com/feed/',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://thesouthfirst.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'Telangana Today',
-        'rss_url': 'https://telanganatoday.com/feed',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://telanganatoday.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'Greater Kashmir',
-        'rss_url': 'https://www.greaterkashmir.com/feed/',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.greaterkashmir.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'DT Next',
-        'rss_url': 'https://www.dtnext.in/feed/',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.dtnext.in/',
-        'max_articles': 10
-    },
-    {
-        'name': 'Livemint',
-        'rss_url': 'https://www.livemint.com/rss/news',
-        'rss_headers_type': 'feedfetcher',
-        'article_strategies': ['selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.livemint.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'Firstpost',
-        'rss_url': 'https://www.firstpost.com/commonfeeds/v1/mfp/rss/india.xml',
-        'rss_headers_type': 'browser',
-        'article_strategies': ['requests_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.firstpost.com/',
-        'max_articles': 10
-    },
-    {
-        'name': 'India Today',
-        'rss_url': 'https://www.indiatoday.in/rss/home',
-        'rss_headers_type': 'feedfetcher',
-        'article_strategies': ['selenium_browser'],
-        'article_url_contains': None,
-        'referer': 'https://www.indiatoday.in/',
-        'max_articles': 10
-    }
+    # {
+    #     'name': 'Onmanorama',
+    #     'rss_url': 'https://www.onmanorama.com/news/india.feeds.onmrss.xml',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.onmanorama.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'EastMojo',
+    #     'rss_url': 'https://www.eastmojo.com/feed/',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.eastmojo.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'The Assam Tribune',
+    #     'rss_url': 'https://assamtribune.com/feed/',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://assamtribune.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'Odisha Bytes',
+    #     'rss_url': 'https://odishabytes.com/feed/',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://odishabytes.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'The South First',
+    #     'rss_url': 'https://thesouthfirst.com/feed/',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://thesouthfirst.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'Telangana Today',
+    #     'rss_url': 'https://telanganatoday.com/feed',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://telanganatoday.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'Greater Kashmir',
+    #     'rss_url': 'https://www.greaterkashmir.com/feed/',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.greaterkashmir.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'DT Next',
+    #     'rss_url': 'https://www.dtnext.in/feed/',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.dtnext.in/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'Livemint',
+    #     'rss_url': 'https://www.livemint.com/rss/news',
+    #     'rss_headers_type': 'feedfetcher',
+    #     'article_strategies': ['selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.livemint.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'Firstpost',
+    #     'rss_url': 'https://www.firstpost.com/commonfeeds/v1/mfp/rss/india.xml',
+    #     'rss_headers_type': 'browser',
+    #     'article_strategies': ['requests_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.firstpost.com/',
+    #     'max_articles': 10
+    # },
+    # {
+    #     'name': 'India Today',
+    #     'rss_url': 'https://www.indiatoday.in/rss/home',
+    #     'rss_headers_type': 'feedfetcher',
+    #     'article_strategies': ['selenium_browser'],
+    #     'article_url_contains': None,
+    #     'referer': 'https://www.indiatoday.in/',
+    #     'max_articles': 10
+    # }
 ]
 
 # ==============================================================================

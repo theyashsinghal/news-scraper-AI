@@ -16,12 +16,14 @@ PROXY_SETTINGS = {
     "proxy_url": None  # e.g., "http://user:pass@proxy.service.com:8080"
 }
 
-# --- GOOGLE SHEETS CONFIGURATION ---
-SHEET_NAME = 'News Scrapper AI'
-WORKSHEET_NAME = 'Sheet1'
+# --- DATABASE CONFIGURATION ---
+import os
+DB_PATH = os.environ.get('SATYA_DB_PATH', '/Users/mac/Downloads/Code/Satya/satya.db')
 # ==============================================================================
 
-import os
+
+import sqlite3
+import zlib
 # --- FATAL FIX: Prevent PyTorch CPU deadlocks in multithreaded environments ---
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -429,85 +431,58 @@ recent_articles_cache = []    # Memory cache for AI clustering with pre-computed
 MAX_ID = 0                    # Global counter for sequential IDs
 
 def init_google_sheets():
-    """Initializes connection to Google Sheets and loads the last 1200 rows to warm up caches instantly."""
-    global sheet, existing_urls_cache, recent_articles_cache, MAX_ID
+    """Initializes connection to the SQLite database and loads data to warm up caches instantly."""
+    global existing_urls_cache, recent_articles_cache, MAX_ID
     
     try:
-        logging.info("Connecting to Google Sheets...")
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        logging.info("Connecting to SQLite database...")
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
         
-        gcp_json = os.environ.get("GCP_SERVICE_ACCOUNT_JSON")
-        if not gcp_json:
-            raise ValueError("GCP_SERVICE_ACCOUNT_JSON secret is missing from environment variables!")
+        # 1. Update Max ID
+        cursor.execute("SELECT MAX(id) FROM articles")
+        max_id_val = cursor.fetchone()[0]
+        if max_id_val:
+            MAX_ID = max_id_val
             
-        creds_dict = json.loads(gcp_json)
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
+        # 2. Populate URL cache
+        cursor.execute("SELECT url FROM articles")
+        urls = cursor.fetchall()
+        for r in urls:
+            if r[0]:
+                existing_urls_cache.add(r[0])
+                
+        # 3. Queue for AI Cache (Only last 24h)
+        cutoff_timestamp = int(time.time()) - 24 * 3600
+        cursor.execute("""
+            SELECT title, content, cluster_id FROM articles 
+            WHERE scraped_at >= ?
+        """, (cutoff_timestamp,))
+        rows = cursor.fetchall()
         
-        sheet = client.open(SHEET_NAME).worksheet(WORKSHEET_NAME)
-        logging.info(f"Connected to Sheet: {SHEET_NAME} / {WORKSHEET_NAME}")
-        
-        # --- HIGH-SPEED RANGE CACHE WARMUP ---
-        # Fetch only the last 1200 rows to bypass downloading heavy full-text JSON payloads
-        total_allocated_rows = sheet.row_count
-        start_row = max(1, total_allocated_rows - 1200)
-        range_str = f"A{start_row}:A{total_allocated_rows}"
-        logging.info(f"Fetching range {range_str} to warm up caches...")
-        
-        try:
-            raw_cells = sheet.get(range_str)
-            raw_column_data = [cell[0] for cell in raw_cells if cell]
-        except Exception as e:
-            logging.error(f"Failed to fetch range values: {e}. Trying full column fallback.")
-            try:
-                raw_column_data = sheet.col_values(1)
-            except Exception as e_full:
-                logging.error(f"Failed to fetch full column: {e_full}")
-                raw_column_data = []
-
-        logging.info(f"Loaded {len(raw_column_data)} rows from sheet range.")
-        
-        cutoff_date = datetime.now() - timedelta(days=1)
         temp_recent_texts = []
         temp_recent_items = []
         
-        for cell_value in raw_column_data:
-            if not cell_value: 
-                continue
+        for r in rows:
+            title = r[0]
+            compressed_content = r[1]
+            cluster_id = r[2]
+            
             try:
-                article_data = json.loads(cell_value)
+                content = zlib.decompress(compressed_content).decode('utf-8')
+            except Exception:
+                content = ""
                 
-                # 1. Populate URL cache
-                if 'url' in article_data:
-                    existing_urls_cache.add(article_data['url'])
-                
-                # 2. Update Max ID
-                if 'id' in article_data:
-                    try:
-                        current_id = int(article_data['id'])
-                        if current_id > MAX_ID:
-                            MAX_ID = current_id
-                    except ValueError:
-                        pass
-
-                # 3. Queue for AI Cache (Only last 24h)
-                if 'scraped_at' in article_data and 'title' in article_data and 'content' in article_data:
-                    try:
-                        scraped_date = datetime.strptime(str(article_data['scraped_at']).split('.')[0], "%Y-%m-%d %H:%M:%S")
-                        if scraped_date >= cutoff_date:
-                            temp_recent_items.append({
-                                'title': article_data['title'],
-                                'content': article_data['content'],
-                                'cluster_id': article_data.get('cluster_id')
-                            })
-                            limit_chars = 700
-                            temp_recent_texts.append(f"{article_data['title']}. {article_data['content'][:limit_chars]}")
-                    except Exception:
-                        pass
-                        
-            except json.JSONDecodeError:
-                continue
-
+            temp_recent_items.append({
+                'title': title,
+                'content': content,
+                'cluster_id': cluster_id
+            })
+            limit_chars = 700
+            temp_recent_texts.append(f"{title}. {content[:limit_chars]}")
+            
+        conn.close()
+        
         # Batch pre-calculate initial cached embeddings
         if temp_recent_texts and semantic_model is not None:
             logging.info(f"Pre-calculating embeddings for {len(temp_recent_texts)} cached articles...")
@@ -518,32 +493,14 @@ def init_google_sheets():
                     recent_articles_cache.append(item)
             except Exception as e_embed:
                 logging.error(f"Failed to batch-encode startup cache: {e_embed}")
-                # Fall back without embeddings
                 for item in temp_recent_items:
                     recent_articles_cache.append(item)
-
+                    
         logging.info(f"Cache built: {len(existing_urls_cache)} URLs. Current MAX_ID: {MAX_ID}")
-
+        
     except Exception as e:
-        logging.critical(f"Failed to initialize Google Sheets: {e}")
+        logging.critical(f"Failed to initialize database: {e}")
         sys.exit(1)
-
-def truncate_to_fit(article_obj):
-    """Recursively truncates content until the JSON string is under 50,000 chars."""
-    json_str = json.dumps(article_obj)
-    
-    # Check size (limit is 50,000, we use 49,000 as a safety buffer)
-    if len(json_str) < 49000:
-        return json_str
-    
-    # Truncate content
-    current_content = article_obj.get('content', '')
-    if len(current_content) > 1000:
-        logging.warning(f"Truncating article {article_obj.get('id', 'unknown')} (Size: {len(json_str)})")
-        article_obj['content'] = current_content[:-1000] + "... [TRUNCATED]"
-        return truncate_to_fit(article_obj)
-    else:
-        return json.dumps(article_obj)
 
 
 # ==============================================================================
@@ -597,7 +554,7 @@ def get_cluster_id_for_article(new_title, new_summary):
 def save_article(source, title, url, summary, image_url):
     """
     Saves a single article to the database. 
-    INCLUDES: The strict 90-word minimum length check & Google Sheets Infinite Retry Loop.
+    INCLUDES: The strict 90-word minimum length check & SQLite thread-safe insert.
     """
     global existing_urls_cache, recent_articles_cache, MAX_ID
     
@@ -635,29 +592,31 @@ def save_article(source, title, url, summary, image_url):
             MAX_ID += 1
             new_id = MAX_ID
 
-            # Create Object
-            article_obj = {
-                "id": new_id,
-                "cluster_id": cluster_id,
-                "source": source,
-                "title": title,
-                "url": url,
-                "content": summary,
-                "image_url": image_url,
-                "scraped_at": str(datetime.now())
-            }
-
-            # Truncate to fit cell limits if needed
-            safe_json = truncate_to_fit(article_obj)
+            # Connect to DB and insert
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
             
-            # --- GOOGLE SHEETS INFINITE RETRY LOOP ---
-            while True:
-                try:
-                    sheet.append_row([safe_json])
-                    break # Success! Exit retry loop
-                except Exception as sheet_err:
-                    logging.warning(f"Google Sheets API failed during append_row: {sheet_err}. Retrying in 20 seconds...")
-                    time.sleep(20)
+            # Resolve source_id
+            cursor.execute("INSERT OR IGNORE INTO sources (name) VALUES (?)", (source,))
+            cursor.execute("SELECT id FROM sources WHERE name = ?", (source,))
+            source_id = cursor.fetchone()[0]
+            
+            # Compress content
+            compressed_content = zlib.compress(summary.encode('utf-8'))
+            scraped_timestamp = int(time.time())
+            
+            try:
+                cursor.execute("""
+                    INSERT INTO articles (id, cluster_id, source_id, title, url, content, image_url, scraped_at, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'scraped')
+                """, (new_id, cluster_id, source_id, title, url, compressed_content, image_url, scraped_timestamp))
+                conn.commit()
+            except sqlite3.IntegrityError as e:
+                logging.warning(f"Database IntegrityError (likely duplicate URL): {e}")
+                conn.close()
+                return False
+                
+            conn.close()
             
             # Update Caches immediately
             existing_urls_cache.add(url)

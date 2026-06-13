@@ -63,6 +63,8 @@ jobs:
           GCP_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
           # Pass the explicit Chrome binary path to Python
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+          SATYA_DB_URL: ${{ secrets.SATYA_DB_URL }}
+          SATYA_DB_TOKEN: ${{ secrets.SATYA_DB_TOKEN }}
         run: |
           python news_scraper_AI.py
 

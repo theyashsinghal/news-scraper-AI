@@ -1,13 +1,13 @@
 name: Run News Scraper with logs
-on:
-  schedule:
-    - cron: '*/30 * * * *'  # Run every 30 minutes
-  workflow_dispatch:      # Manual trigger
+# on:
+#   schedule:
+#     - cron: '*/30 * * * *'  # Run every 30 minutes
+#   workflow_dispatch:      # Manual trigger
 
-# Prevent multiple instances from running simultaneously by canceling the previous active run
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: true
+# # Prevent multiple instances from running simultaneously by canceling the previous active run
+# concurrency:
+#   group: ${{ github.workflow }}
+#   cancel-in-progress: true
 
 jobs:
   scrape_news:

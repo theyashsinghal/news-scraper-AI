@@ -477,8 +477,9 @@ def init_google_sheets():
         if max_id_val:
             MAX_ID = max_id_val
             
-        # 2. Populate URL cache
-        cursor.execute("SELECT url FROM articles")
+        # 2. Populate URL cache (only last 14 days for memory deduplication)
+        cutoff_url = int(time.time()) - 14 * 24 * 3600
+        cursor.execute("SELECT url FROM articles WHERE scraped_at >= ?", (cutoff_url,))
         urls = cursor.fetchall()
         for r in urls:
             if r[0]:

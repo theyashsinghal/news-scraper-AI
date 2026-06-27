@@ -442,6 +442,10 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                             timer.start()
                             
                             try:
+                                try:
+                                    selenium_driver.get("about:blank")
+                                except Exception:
+                                    pass
                                 selenium_driver.get(article_url)
                                 WebDriverWait(selenium_driver, 10).until(
                                     EC.presence_of_element_located((By.TAG_NAME, "p"))

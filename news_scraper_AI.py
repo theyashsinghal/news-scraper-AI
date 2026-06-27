@@ -728,6 +728,7 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                     continue
 
                 rss_title = item.title.text if item.title else "Title not found"
+                rss_description = None
                 
                 # Get the raw RSS description now, for potential fallback later
                 if item.description:
@@ -763,6 +764,10 @@ def scrape_source(session, selenium_driver, source_config, proxies_dict):
                                 continue
                             
                             try:
+                                try:
+                                    selenium_driver.get("about:blank")
+                                except Exception:
+                                    pass
                                 selenium_driver.get(article_url)
                                 resolved_url = selenium_driver.current_url
                                 if resolved_url and "news.google.com" not in resolved_url:

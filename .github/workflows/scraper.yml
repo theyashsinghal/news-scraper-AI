@@ -131,3 +131,14 @@ jobs:
           token: ${{ secrets.REPHRASER_PAT }}
           repository: theyashsinghal/rephrased_news_articles
           event-type: trigger-rephraser
+
+
+  keepalive:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keepalive Workflow
+        uses: gautamkrishnar/keepalive-workflow@v2

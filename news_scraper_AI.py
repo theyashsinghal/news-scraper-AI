@@ -4,7 +4,7 @@
 # How many articles to get from each source (e.g., 5)
 # This is a 'quota'. The script will keep scanning the feed until it saves
 # this many NEW articles (or runs out of items).
-MAX_ARTICLES_PER_SOURCE = 20
+MAX_ARTICLES_PER_SOURCE = 50
 
 # Skip feed items published longer ago than this many days.
 # Stops feeds like Economic Times from feeding you 2008-era articles.

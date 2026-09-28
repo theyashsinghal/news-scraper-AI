@@ -12,7 +12,7 @@ MAX_ARTICLE_AGE_DAYS = 3
 
 # Stop scanning a feed after this many consecutive already-seen/skipped items.
 # Protects the 420s time budget when a feed is mostly old news.
-MAX_CONSECUTIVE_SKIPS = 25
+MAX_CONSECUTIVE_SKIPS = 77
 
 # Overall time budget (seconds) for the whole scrape job.
 JOB_TIMEOUT_SECONDS = 420

@@ -399,11 +399,51 @@ def normalize_url(url):
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), ''))
 
 
+URL_CACHE_DAYS = 3            # URLs preloaded per run; older ones are looked up one by one
+absent_urls_cache = set()     # URLs confirmed NOT in the DB this run (avoid re-asking)
+_lookup_lock = threading.Lock()
+_lookup_conn = None
+
+
+def _url_in_db(url, norm):
+    """One indexed lookup on articles.url (UNIQUE) for a URL not in the preloaded cache.
+    Errors count as 'not seen': the INSERT's UNIQUE(url) check still catches duplicates."""
+    global _lookup_conn
+    with _lookup_lock:
+        for attempt in range(2):
+            try:
+                if _lookup_conn is None:
+                    _lookup_conn = get_db_connection()
+                cur = _lookup_conn.cursor()
+                cur.execute("SELECT 1 FROM articles WHERE url IN (?, ?) LIMIT 1", (url, norm))
+                return cur.fetchone() is not None
+            except Exception as e:
+                logging.warning(f"URL lookup failed ({e}); retrying with a new connection")
+                try:
+                    _lookup_conn.close()
+                except Exception:
+                    pass
+                _lookup_conn = None
+        return False
+
+
 def url_seen(url):
-    """Thread-safe check: has this URL (raw or normalized) already been seen?"""
+    """Thread-safe check: has this URL (raw or normalized) already been seen?
+    Recent URLs are preloaded; anything older is checked in the DB once and remembered."""
     norm = normalize_url(url)
     with db_lock:
-        return url in existing_urls_cache or norm in existing_urls_cache
+        if url in existing_urls_cache or norm in existing_urls_cache:
+            return True
+        if url in absent_urls_cache:
+            return False
+    found = _url_in_db(url, norm)
+    with db_lock:
+        if found:
+            existing_urls_cache.add(url)
+            existing_urls_cache.add(norm)
+        else:
+            absent_urls_cache.add(url)
+    return found
 
 
 def init_google_sheets():
@@ -421,10 +461,12 @@ def init_google_sheets():
         if max_id_val:
             MAX_ID = max_id_val
 
-        # 2. Populate URL cache with ALL urls (not just the last 14 days).
-        # Old articles that a feed keeps re-serving were in the DB but not in
-        # the cache, so every run re-fetched them and then hit UNIQUE(url).
-        cursor.execute("SELECT url FROM articles")
+        # 2. Populate URL cache with the last few days of URLs (what feeds mostly serve).
+        # Loading every URL ever scraped read the whole articles table (~107k rows) on
+        # every run. Older URLs a feed still re-serves are caught by url_seen()'s
+        # one-row DB lookup instead, so they are still never re-fetched.
+        cursor.execute("SELECT url FROM articles WHERE scraped_at >= ?",
+                       (int(time.time()) - URL_CACHE_DAYS * 86400,))
         for r in cursor.fetchall():
             if r[0]:
                 existing_urls_cache.add(r[0])

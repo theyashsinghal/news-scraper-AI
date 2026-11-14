@@ -1,0 +1,642 @@
+2026-11-14 10:02:14,105 - INFO - Loading AI Semantic Model (all-MiniLM-L6-v2)...
+2026-11-14 10:02:14,106 - INFO - No device provided, using cpu
+2026-11-14 10:02:14,139 - INFO - HTTP Request: GET https://huggingface.co/api/agent-harnesses "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,155 - INFO - HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,172 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/modules.json "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,172 - WARNING - Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-11-14 10:02:14,176 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/modules.json?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2Fmodules.json=&etag=%22952a9b81c0bfd99800fabf352f69c7ccd46c5e43%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,192 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config_sentence_transformers.json "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,197 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config_sentence_transformers.json?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2Fconfig_sentence_transformers.json=&etag=%22fd1b291129c607e5d49799f87cb219b27f98acdf%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,198 - INFO - Loading SentenceTransformer model from sentence-transformers/all-MiniLM-L6-v2.
+2026-11-14 10:02:14,210 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/README.md "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,215 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/README.md?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2FREADME.md=&etag=%2244af2e3b0fa3a0b6239e48422972bf755f28fde0%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,219 - INFO - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/README.md?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2FREADME.md=&etag=%2244af2e3b0fa3a0b6239e48422972bf755f28fde0%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,233 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/sentence_bert_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,237 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/sentence_bert_config.json?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2Fsentence_bert_config.json=&etag=%2259d594003bf59880a884c574bf88ef7555bb0202%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,254 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/adapter_config.json "HTTP/1.1 404 Not Found"
+2026-11-14 10:02:14,265 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,269 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/config.json?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2Fconfig.json=&etag=%2272b987fd805cfa2b58c4c8c952b274a11bfd5a00%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,307 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/model.safetensors "HTTP/1.1 302 Found"
+2026-11-14 10:02:14,407 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/processor_config.json "HTTP/1.1 404 Not Found"
+2026-11-14 10:02:14,422 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-11-14 10:02:14,438 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-11-14 10:02:14,449 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,453 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer_config.json?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2Ftokenizer_config.json=&etag=%22c79f2b6a0cea6f4b564fed1938984bace9d30ff0%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,473 - INFO - HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-11-14 10:02:14,491 - INFO - HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,503 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/vocab.txt "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,508 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/vocab.txt?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2Fvocab.txt=&etag=%22fb140275c155a9c7c5a3b3e0e77a9e839594a938%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,521 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer.json "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,526 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/tokenizer.json?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2Ftokenizer.json=&etag=%22cb202bfe2e3c98645018a6d12f182a434c9d3e02%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,537 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/added_tokens.json "HTTP/1.1 404 Not Found"
+2026-11-14 10:02:14,550 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/special_tokens_map.json "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,554 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/special_tokens_map.json?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2Fspecial_tokens_map.json=&etag=%22e7b0375001f109a6b8873d756ad4f7bbb15fbaa5%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,567 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/chat_template.jinja "HTTP/1.1 404 Not Found"
+2026-11-14 10:02:14,603 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/1_Pooling/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-11-14 10:02:14,607 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/1_Pooling%2Fconfig.json?%2Fsentence-transformers%2Fall-MiniLM-L6-v2%2Fresolve%2F1110a243fdf4706b3f48f1d95db1a4f5529b4d41%2F1_Pooling%2Fconfig.json=&etag=%22d1514c3162bbe87b343f565fadc62e6c06f04f03%22 "HTTP/1.1 200 OK"
+2026-11-14 10:02:14,621 - INFO - HTTP Request: HEAD https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/1110a243fdf4706b3f48f1d95db1a4f5529b4d41/2_Normalize/config.json "HTTP/1.1 404 Not Found"
+2026-11-14 10:02:14,623 - INFO - AI Model loaded successfully.
+2026-11-14 10:02:14,623 - INFO - --- Scraper service started (CI Mode: Run Once) ---
+2026-11-14 10:02:14,623 - INFO - --- Starting new scraping job (Parallel Mode) ---
+2026-11-14 10:02:14,623 - INFO - Connecting to database...
+2026-11-14 10:02:18,942 - INFO - Pre-calculating embeddings for 577 cached articles...
+2026-11-14 10:02:39,039 - INFO - Cache built: 2361 URLs. Current MAX_ID: 152832
+2026-11-14 10:02:39,039 - INFO - Creating new robust session with 3 retries on 5xx/connection/read errors.
+2026-11-14 10:02:39,040 - INFO - Proxy is DISABLED.
+2026-11-14 10:02:39,040 - INFO - [BBC] (Thread) requires Selenium. Initializing driver...
+2026-11-14 10:02:39,040 - INFO - [Times of India] (Thread) requires Selenium. Initializing driver...
+2026-11-14 10:02:39,041 - INFO - [The Hindu] (Thread) requires Selenium. Initializing driver...
+2026-11-14 10:02:39,041 - INFO - [Al Jazeera] (Thread) requires Selenium. Initializing driver...
+2026-11-14 10:02:39,042 - INFO - Starting scrape for TechCrunch RSS feed: https://techcrunch.com/feed/
+2026-11-14 10:02:39,043 - INFO - [Economic Times] (Thread) requires Selenium. Initializing driver...
+2026-11-14 10:02:39,044 - INFO - [Wired] (Thread) requires Selenium. Initializing driver...
+2026-11-14 10:02:39,045 - INFO - [NDTV] (Thread) requires Selenium. Initializing driver...
+2026-11-14 10:02:39,045 - INFO - [Indian Express] (Thread) requires Selenium. Initializing driver...
+2026-11-14 10:02:39,045 - INFO - Submitted 9 jobs to thread pool. Waiting up to 420s for completion...
+2026-11-14 10:02:39,156 - INFO - Found 20 articles in TechCrunch RSS feed. Processing until 8 new articles are saved.
+2026-11-14 10:02:39,156 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/amazons-new-kindle-colorsoft-is-a-premium-e-reader-with-a-premium-price/ already exists.
+2026-11-14 10:02:39,157 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/jensen-huangs-departure-blasts-big-hole-in-ai-startup-funding-vcs-and-founders-say/ already exists.
+2026-11-14 10:02:39,157 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/u-s-government-grounds-all-flights-across-the-united-states-due-to-extraordinary-cirumstances/ already exists.
+2026-11-14 10:02:39,157 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/this-young-startup-wants-to-power-floating-data-centers-with-the-oceans-heat-and-investors-are-already-on-board/ already exists.
+2026-11-14 10:02:39,157 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/ai-agent-startup-langchain-hits-3b-valuation/ already exists.
+2026-11-14 10:02:39,157 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/export-banned-nvidia-chips-are-behind-chinas-most-powerful-ai-models-uh-oh-jensen/ already exists.
+2026-11-14 10:02:39,157 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/chatgpts-new-wallet-lets-ai-agents-shop-and-check-out-for-you/ already exists.
+2026-11-14 10:02:39,158 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/nvidia-ceo-jensen-huangs-affair-with-alleged-chinese-spy-a-timeline/ already exists.
+2026-11-14 10:02:39,158 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/uber-confirms-hackers-stole-thousands-of-drivers-license-information-in-data-breach/ already exists.
+2026-11-14 10:02:39,158 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/elevenlabs-new-app-combines-meeting-note-taking-and-dictation-for-teams/ already exists.
+2026-11-14 10:02:39,158 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/microsoft-latest-email-outage-turned-into-a-full-blown-global-cloud-crisis/ already exists.
+2026-11-14 10:02:39,158 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/israels-vcs-see-opportunity-for-challengers-in-nvidias-turmoil/ already exists.
+2026-11-14 10:02:39,158 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/13/jensen-huang-didnt-show-confidence-in-his-successor-report-says/ already exists.
+2026-11-14 10:02:39,158 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/12/democrats-launch-nvidia-investigation-write-scathing-letter-on-huangs-scheme-with-trump/ already exists.
+2026-11-14 10:02:39,159 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/12/muse-can-now-place-calls-to-u-s-businesses-if-you-pay/ already exists.
+2026-11-14 10:02:39,159 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/12/nebius-tests-the-neocloud-playbook-with-40-billion-in-planned-spending/ already exists.
+2026-11-14 10:02:39,159 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/12/jensen-huang-was-having-a-third-affair-reuters-reports/ already exists.
+2026-11-14 10:02:39,159 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/12/googles-latest-search-upgrade-promises-better-answers-to-your-most-complicated-questions/ already exists.
+2026-11-14 10:02:39,159 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/12/nectar-launches-an-ai-agent-to-automate-creator-discovery-and-outreach-for-brands/ already exists.
+2026-11-14 10:02:39,159 - INFO - [TechCrunch] Early skip: URL https://techcrunch.com/2026/11/12/jensen-huangs-exit-puts-nvidias-support-for-open-source-in-question/ already exists.
+2026-11-14 10:02:42,472 - INFO - Selenium driver initialized successfully (Eager load, 7s timeout, images off).
+2026-11-14 10:02:42,472 - INFO - Starting scrape for Al Jazeera RSS feed: https://www.aljazeera.com/xml/rss/all.xml
+2026-11-14 10:02:42,616 - INFO - Found 25 articles in Al Jazeera RSS feed. Processing until 8 new articles are saved.
+2026-11-14 10:02:42,621 - INFO - [Al Jazeera] Skipping filtered URL: https://www.aljazeera.com/video/newsfeed/2026/11/14/migrant-caravan-heads-to-us-from-mexico-after-democrats-midterm-win?traffic_source=rss
+2026-11-14 10:02:43,726 - INFO - [Al Jazeera] Article: https://www.aljazeera.com/news/2026/11/14/netanyahu-may-fall-but-his-far-right-legacy-in-israel-is-going-nowhere?traffic_source=rss
+2026-11-14 10:02:43,729 - INFO - Selenium driver initialized successfully (Eager load, 7s timeout, images off).
+2026-11-14 10:02:43,729 - INFO - [Al Jazeera] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:02:43,730 - INFO - Selenium driver initialized successfully (Eager load, 7s timeout, images off).
+2026-11-14 10:02:43,731 - INFO - Selenium driver initialized successfully (Eager load, 7s timeout, images off).
+2026-11-14 10:02:43,731 - INFO - Starting scrape for Economic Times RSS feed: https://economictimes.indiatimes.com/rssfeedsdefault.cms
+2026-11-14 10:02:43,732 - INFO - Selenium driver initialized successfully (Eager load, 7s timeout, images off).
+2026-11-14 10:02:43,732 - INFO - Selenium driver initialized successfully (Eager load, 15s timeout, images off).
+2026-11-14 10:02:43,733 - INFO - Starting scrape for Indian Express RSS feed: https://indianexpress.com/feed/
+2026-11-14 10:02:43,733 - INFO - Selenium driver initialized successfully (Eager load, 7s timeout, images off).
+2026-11-14 10:02:43,733 - INFO - Selenium driver initialized successfully (Eager load, 7s timeout, images off).
+2026-11-14 10:02:43,733 - INFO - Starting scrape for Times of India RSS feed: https://timesofindia.indiatimes.com/rssfeeds/296589292.cms
+2026-11-14 10:02:43,734 - INFO - Starting scrape for Wired RSS feed: https://www.wired.com/feed/rss
+2026-11-14 10:02:43,734 - INFO - Starting scrape for The Hindu RSS feed: https://www.thehindu.com/news/national/feeder/default.rss
+2026-11-14 10:02:43,735 - INFO - Starting scrape for BBC RSS feed: http://feeds.bbci.co.uk/news/world/rss.xml
+2026-11-14 10:02:43,735 - INFO - Starting scrape for NDTV RSS feed: https://feeds.feedburner.com/ndtvnews-top-stories
+2026-11-14 10:02:43,845 - INFO - [Al Jazeera] Success with 'requests_browser'. Found content (1197 words).
+2026-11-14 10:02:43,911 - INFO - Found 25 articles in BBC RSS feed. Processing until 10 new articles are saved.
+2026-11-14 10:02:43,911 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cqx2wyvyr3zzo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:02:43,912 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cw20xmy0m5yyo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:02:43,913 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/ckz74jzpy18do?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:02:43,913 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/c6rrg51rkz09o?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:02:43,913 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/ckregdgnl0xpo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:02:43,913 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cq39glwprknjo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:02:43,914 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cqvg2d1eg7zro?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:02:44,351 - INFO - [BBC] Article: https://www.bbc.co.uk/sport/articles/cm4gn9lvlgy2o?at_medium=RSS&at_campaign=rss
+2026-11-14 10:02:44,351 - INFO - [BBC] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:02:44,431 - INFO - Found 20 articles in NDTV RSS feed. Processing until 10 new articles are saved.
+2026-11-14 10:02:44,870 - INFO - [NDTV] Article: https://www.ndtv.com/opinion/opinion-nvidias-jensen-huangs-rise-fall-and-americas-silicon-achilles-heel-12325875#publisher=newsstand
+2026-11-14 10:02:44,870 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:02:44,879 - INFO - Found 60 articles in The Hindu RSS feed. Processing until 50 new articles are saved.
+2026-11-14 10:02:45,313 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/kerala/kvasu-signs-mou-with-uae-university-for-veterinary-education-research/article71701338.ece
+2026-11-14 10:02:45,314 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:02:45,317 - INFO - Found 20 articles in Times of India RSS feed. Processing until 50 new articles are saved.
+2026-11-14 10:02:45,752 - INFO - [Times of India] Article: https://timesofindia.indiatimes.com/world/us/in-2006-a-baltimore-developer-promised-to-transform-poppleton-into-a-new-urban-district-20-years-later-residents-face-a-failed-redevelopment-and-a-supreme-court-refusal-to-hear-their-case/articleshow/135730792.cms
+2026-11-14 10:02:45,753 - INFO - [Times of India] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:02:45,762 - INFO - Found 50 articles in Wired RSS feed. Processing until 10 new articles are saved.
+2026-11-14 10:02:46,196 - INFO - [Wired] Article: https://www.wired.com/story/thanksgiving-meal-deals-2026/
+2026-11-14 10:02:46,197 - INFO - [Wired] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:02:46,221 - INFO - Found 76 articles in Economic Times RSS feed. Processing until 50 new articles are saved.
+2026-11-14 10:02:46,659 - INFO - [Economic Times] Article: https://economictimes.indiatimes.com/markets/stocks/news/jefferies-chris-wood-sees-fresh-us-iran-tensions-as-biggest-risk-to-india-sees-this-sector-as-the-best-hedge/articleshow/135828570.cms
+2026-11-14 10:02:46,661 - INFO - [Economic Times] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:02:46,662 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:02:49,406 - INFO - >>> SUCCESSFULLY SAVED [ID: 152833] - Netanyahu may fall, but his far-right legacy in Israel is going nowhere from Al Jazeera (1197 words)
+2026-11-14 10:02:49,524 - INFO - [BBC] Success with 'requests_browser'. Found content (679 words).
+2026-11-14 10:02:49,593 - INFO - [The Hindu] Success with 'requests_browser'. Found content (280 words).
+2026-11-14 10:02:50,329 - INFO - [NDTV] Success with 'selenium_browser'. Found content (1754 words).
+2026-11-14 10:02:50,436 - INFO - [Economic Times] Success with 'requests_browser'. Found content (797 words).
+2026-11-14 10:02:50,468 - INFO - [Al Jazeera] Skipping filtered URL: https://www.aljazeera.com/video/newsfeed/2026/11/14/pochettino-bids-emotional-farewell-to-us-football-ahead-of-man-utd-move?traffic_source=rss
+2026-11-14 10:02:50,928 - INFO - [Al Jazeera] Article: https://www.aljazeera.com/news/2026/11/14/qatar-and-turkiye-sign-a-mutual-defence-pact-what-do-we-know?traffic_source=rss
+2026-11-14 10:02:50,928 - INFO - [Al Jazeera] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:02:51,057 - INFO - Found 200 articles in Indian Express RSS feed. Processing until 10 new articles are saved.
+2026-11-14 10:02:51,522 - INFO - [Indian Express] Article: https://indianexpress.com/article/cities/delhi/woman-beaten-to-death-with-stone-after-objecting-to-man-moving-her-off-road-10962962/
+2026-11-14 10:02:51,522 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:02:51,673 - INFO - [Al Jazeera] Success with 'requests_browser'. Found content (882 words).
+2026-11-14 10:02:54,238 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:02:54,241 - INFO - [Times of India] Page content loaded.
+2026-11-14 10:02:54,469 - INFO - >>> SUCCESSFULLY SAVED [ID: 152834] - KVASU signs MoU with UAE university for veterinary education, research from The Hindu (280 words)
+2026-11-14 10:02:57,338 - INFO - >>> SUCCESSFULLY SAVED [ID: 152835] - Estonia latest country to ban Russian athletes as backlash intensifies from BBC (679 words)
+2026-11-14 10:02:58,164 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/tamil-nadu/avian-influenza-confirmed-in-cuddalore-over-1500-chickens-culled/article71701325.ece
+2026-11-14 10:02:58,164 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:02:58,381 - INFO - [The Hindu] Success with 'requests_browser'. Found content (558 words).
+2026-11-14 10:02:58,435 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (215 words).
+2026-11-14 10:03:01,166 - INFO - [Wired] Page content loaded.
+2026-11-14 10:03:01,177 - INFO - >>> SUCCESSFULLY SAVED [ID: 152836] - Opinion: Jensen Huang's Rise, Fall And America's Silicon Achilles' Heel from NDTV (1754 words)
+2026-11-14 10:03:01,189 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cwg7l8n7dx5mo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,206 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/c6jre3z03w4go?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,210 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cmy4930jq749o?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,210 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/c5gm3gnwl42eo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,210 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cr3eg97eqde1o?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,222 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cklyw3neqg2wo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,222 - INFO - [BBC] Skipping filtered URL: https://www.bbc.co.uk/news/videos/c893ryz7lw33o?at_medium=RSS&at_campaign=rss
+2026-11-14 10:03:01,222 - INFO - [BBC] Skipping filtered URL: https://www.bbc.co.uk/news/videos/ck4gn4y77m40o?at_medium=RSS&at_campaign=rss
+2026-11-14 10:03:01,222 - INFO - [BBC] Skipping filtered URL: https://www.bbc.co.uk/news/videos/ckqx5ryx905qo?at_medium=RSS&at_campaign=rss
+2026-11-14 10:03:01,222 - INFO - [BBC] Skipping filtered URL: https://www.bbc.co.uk/news/videos/cxvg23n59y1ro?at_medium=RSS&at_campaign=rss
+2026-11-14 10:03:01,223 - INFO - [BBC] Skipping filtered URL: https://www.bbc.co.uk/news/videos/cv5y1309dg3go?at_medium=RSS&at_campaign=rss
+2026-11-14 10:03:01,223 - INFO - [BBC] Skipping filtered URL: https://www.bbc.co.uk/news/videos/cm93rp3gxn6qo?at_medium=RSS&at_campaign=rss
+2026-11-14 10:03:01,223 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cwm2mn272nqlo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,223 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cmlydy0xw45wo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,223 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/ck1exevgql4qo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:01,665 - INFO - [BBC] Article: https://www.bbc.co.uk/news/articles/cw4gn0ky2pgdo?at_medium=RSS&at_campaign=rss
+2026-11-14 10:03:01,665 - INFO - [BBC] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:01,882 - INFO - [Times of India] Success with 'selenium_browser'. Found content (793 words).
+2026-11-14 10:03:01,886 - INFO - [BBC] Success with 'requests_browser'. Found content (1266 words).
+2026-11-14 10:03:04,907 - INFO - >>> SUCCESSFULLY SAVED [ID: 152837] - Jefferies' Chris Wood sees fresh US-Iran tensions as biggest risk to India, sees this sector as the best hedge from Economic Times (797 words)
+2026-11-14 10:03:05,312 - INFO - [NDTV] Article: https://www.ndtv.com/india-news/man-poses-as-pmo-official-threatens-cctv-firm-for-heavy-discounts-charged-ghaziabad-12325897#publisher=newsstand
+2026-11-14 10:03:05,312 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:03:05,329 - INFO - [Wired] Success with 'selenium_browser'. Found content (428 words).
+2026-11-14 10:03:05,659 - INFO - DEDUPLICATION: Found match (Score: 0.85). Linking to Cluster ID: 962a1a98-ef2c-4f24-a87b-5e50a1cd5a30
+2026-11-14 10:03:08,222 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:03:08,225 - INFO - >>> SUCCESSFULLY SAVED [ID: 152838] - Qatar and Turkiye sign a mutual defence pact: What do we know? from Al Jazeera (882 words)
+2026-11-14 10:03:08,644 - INFO - [Economic Times] Article: https://economictimes.indiatimes.com/markets/stocks/news/softbank-continues-to-offload-indian-equities-sells-meesho-shares-worth-rs-1885-cr-which-other-stocks-did-it-sell-this-year/articleshow/135827766.cms
+2026-11-14 10:03:08,644 - INFO - [Economic Times] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:11,324 - INFO - >>> SUCCESSFULLY SAVED [ID: 152839] - Avian influenza confirmed in Tamil Nadu’s Cuddalore; over 1,500 chickens culled from The Hindu (558 words)
+2026-11-14 10:03:11,741 - INFO - [NDTV] Success with 'selenium_browser'. Found content (329 words).
+2026-11-14 10:03:11,741 - INFO - [Al Jazeera] Article: https://www.aljazeera.com/news/2026/11/14/hungarian-investigators-uncover-19-5m-hidden-in-forests-and-buildings?traffic_source=rss
+2026-11-14 10:03:11,752 - INFO - [Al Jazeera] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:11,953 - INFO - [Al Jazeera] Success with 'requests_browser'. Found content (366 words).
+2026-11-14 10:03:12,036 - INFO - [Economic Times] Success with 'requests_browser'. Found content (648 words).
+2026-11-14 10:03:15,331 - INFO - >>> SUCCESSFULLY SAVED [ID: 152840] - Woman beaten to death with stone after objecting to man moving her off road from Indian Express (215 words)
+2026-11-14 10:03:15,754 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/karnataka/karnataka-deputy-cm-parameshwara-writes-to-modi-shah-seeking-inclusion-of-states-scst-reservation-law-in-ninth-schedule-on-the-lines-of-tamil-nadu/article71701274.ece
+2026-11-14 10:03:15,754 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:15,903 - INFO - [The Hindu] Success with 'requests_browser'. Found content (433 words).
+2026-11-14 10:03:18,691 - INFO - >>> SUCCESSFULLY SAVED [ID: 152841] - Eurovision Song Contest is finally coming to Asia - meet the stars gearing up in Thailand from BBC (1266 words)
+2026-11-14 10:03:19,106 - INFO - [Indian Express] Article: https://indianexpress.com/article/cities/delhi/delhi-meerut-namo-bharat-limited-stop-fast-trains-peak-hours-schedule-ncrtc-10962955/
+2026-11-14 10:03:19,115 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:03:21,883 - INFO - >>> SUCCESSFULLY SAVED [ID: 152842] - In 2006, a Baltimore developer promised to transform Poppleton into a new urban district; 20 years later, residents face a failed redevelopment and a Supreme Court refusal to hear their case from Times of India (793 words)
+2026-11-14 10:03:21,884 - INFO - [BBC] Early skip: URL https://www.bbc.co.uk/news/articles/cq99e0z4vg1eo?at_medium=RSS&at_campaign=rss already exists.
+2026-11-14 10:03:21,884 - INFO - [BBC] (Thread) Finished. Shutting down its Selenium driver.
+2026-11-14 10:03:21,953 - INFO - [BBC] driver.quit() successful.
+2026-11-14 10:03:24,533 - INFO - >>> SUCCESSFULLY SAVED [ID: 152843] - Where to Buy a Full Thanksgiving Meal for $35 or Less from Wired (428 words)
+2026-11-14 10:03:25,343 - INFO - [Times of India] Article: https://timesofindia.indiatimes.com/world/rest-of-world/former-canadian-premier-danny-williams-donated-185-acres-of-family-land-to-protect-rare-lichens-the-gift-expands-a-newfoundland-nature-reserve-to-1198-acres/articleshow/135767978.cms
+2026-11-14 10:03:25,344 - INFO - [Times of India] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:03:28,066 - INFO - >>> SUCCESSFULLY SAVED [ID: 152844] - Nearly $20m found in Hungary’s forests, buildings amid corruption probe from Al Jazeera (366 words)
+2026-11-14 10:03:28,481 - INFO - [Wired] Article: https://www.wired.com/story/these-ghostly-galaxies-have-lost-their-dark-matter/
+2026-11-14 10:03:28,481 - INFO - [Wired] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:03:28,603 - INFO - [Al Jazeera] Skipping filtered URL: https://www.aljazeera.com/video/newsfeed/2026/11/14/hungary-seizes-18m-cash-tied-to-ex-orban-era-minister-in-probe?traffic_source=rss
+2026-11-14 10:03:29,014 - INFO - [Al Jazeera] Article: https://www.aljazeera.com/sports/2026/11/14/warner-cricket-australia-ball-tampering-sandpapergate-khawaja-cummins?traffic_source=rss
+2026-11-14 10:03:29,015 - INFO - [Al Jazeera] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:31,561 - INFO - [Al Jazeera] Success with 'requests_browser'. Found content (401 words).
+2026-11-14 10:03:31,782 - INFO - [Times of India] Page content loaded.
+2026-11-14 10:03:31,794 - INFO - >>> SUCCESSFULLY SAVED [ID: 152845] - Man Poses As PMO Official, Threatens CCTV Firm For Heavy Discounts, Charged from NDTV (329 words)
+2026-11-14 10:03:34,613 - INFO - >>> SUCCESSFULLY SAVED [ID: 152846] - Softbank continues to offload Indian equities, sells Meesho shares worth Rs 1,885 cr. Which other stocks did it sell this year? from Economic Times (648 words)
+2026-11-14 10:03:35,433 - INFO - [NDTV] Article: https://www.ndtv.com/india-news/over-500-questioned-20-detained-in-terrorist-attack-on-crpf-camp-in-kulgam-jammu-and-kashmir-12325890#publisher=newsstand
+2026-11-14 10:03:36,275 - INFO - [Economic Times] Article: https://economictimes.indiatimes.com/markets/cryptocurrency/bitcoin-near-67000-stronger-dollar-fed-tightening-fears-and-etf-outflows-weigh-on-crypto-markets/articleshow/135827677.cms
+2026-11-14 10:03:36,275 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:03:36,276 - INFO - [Economic Times] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:37,977 - INFO - [Wired] Page content loaded.
+2026-11-14 10:03:39,046 - INFO - >>> SUCCESSFULLY SAVED [ID: 152847] - Karnataka Deputy CM Parameshwara writes to Modi, Shah seeking inclusion of State’s SC/ST reservation law in Ninth Schedule on the lines of Tamil Nadu from The Hindu (433 words)
+2026-11-14 10:03:39,075 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:03:40,764 - INFO - [Economic Times] Success with 'requests_browser'. Found content (485 words).
+2026-11-14 10:03:41,529 - INFO - [Times of India] Success with 'selenium_browser'. Found content (558 words).
+2026-11-14 10:03:41,779 - INFO - >>> SUCCESSFULLY SAVED [ID: 152848] - ‘Sandpapergate’: David Warner accuses Cricket Australia of ‘cover-up’ from Al Jazeera (401 words)
+2026-11-14 10:03:42,569 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/kerala/keralam-government-to-buy-new-vehicles-for-ministers-and-chief-secretary/article71701214.ece
+2026-11-14 10:03:42,580 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:43,061 - INFO - [Al Jazeera] Article: https://www.aljazeera.com/sports/2026/11/14/nba-cup-basketball-pacers-knicks-spurs-warriors?traffic_source=rss
+2026-11-14 10:03:43,076 - INFO - [Al Jazeera] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:43,288 - INFO - [Wired] Success with 'selenium_browser'. Found content (1568 words).
+2026-11-14 10:03:43,342 - INFO - [Al Jazeera] Success with 'requests_browser'. Found content (611 words).
+2026-11-14 10:03:43,466 - INFO - [NDTV] Success with 'selenium_browser'. Found content (376 words).
+2026-11-14 10:03:43,513 - INFO - [The Hindu] Success with 'requests_browser'. Found content (342 words).
+2026-11-14 10:03:46,279 - INFO - >>> SUCCESSFULLY SAVED [ID: 152849] - Bitcoin near $67,000: Stronger dollar, Fed tightening fears and ETF outflows weigh on crypto markets from Economic Times (485 words)
+2026-11-14 10:03:49,070 - INFO - >>> SUCCESSFULLY SAVED [ID: 152850] - Former Canadian premier Danny Williams donated 185 acres of family land to protect rare lichens; the gift expands a Newfoundland nature reserve to 1,198 acres from Times of India (558 words)
+2026-11-14 10:03:49,824 - INFO - [Economic Times] Article: https://economictimes.indiatimes.com/markets/stocks/news/s-narens-art-of-contra-investing-hdfc-bank-natco-pharma-other-7-top-picks-down-up-to-39-from-52-week-highs-what-this-means/articleshow/135827575.cms
+2026-11-14 10:03:49,824 - INFO - [Economic Times] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:49,826 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:03:52,790 - INFO - >>> SUCCESSFULLY SAVED [ID: 152851] - Pacers hold off Knicks in NBA Cup thriller, Spurs rout Warriors from Al Jazeera (611 words)
+2026-11-14 10:03:53,168 - INFO - [Times of India] Article: https://timesofindia.indiatimes.com/world/us/us-flight-chaos-in-photos-long-queues-crowded-terminals-and-thousands-of-passengers-in-limbo/photostory/135824081.cms
+2026-11-14 10:03:53,169 - INFO - [Times of India] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:03:53,258 - INFO - [Economic Times] Success with 'requests_browser'. Found content (778 words).
+2026-11-14 10:03:56,187 - INFO - >>> SUCCESSFULLY SAVED [ID: 152852] - These ‘Ghostly’ Galaxies Have Lost Their Dark Matter from Wired (1568 words)
+2026-11-14 10:03:56,199 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/news/2026/11/14/un-says-25-seafarers-killed-in-around-hormuz-since-february?traffic_source=rss already exists.
+2026-11-14 10:03:56,200 - INFO - [Al Jazeera] Skipping filtered URL: https://www.aljazeera.com/video/newsfeed/2026/11/14/missing-australian-teenager-reunites-with-his-mother?traffic_source=rss
+2026-11-14 10:03:56,200 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/sports/2026/11/14/reijnders-hattrick-netherlands-germany-uefa-nations-league-football?traffic_source=rss already exists.
+2026-11-14 10:03:56,200 - INFO - [Al Jazeera] Skipping filtered URL: https://www.aljazeera.com/video/newsfeed/2026/11/14/protesters-heckle-hakeem-jeffries-at-democratic-conference?traffic_source=rss
+2026-11-14 10:03:56,200 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/opinions/2026/11/14/the-ancs-implosion-was-decades-in-the-making?traffic_source=rss already exists.
+2026-11-14 10:03:56,200 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/economy/2026/11/14/southeast-asian-leaders-to-meet-as-trump-visit-highlights-trade-disruption?traffic_source=rss already exists.
+2026-11-14 10:03:56,200 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/opinions/2026/11/14/ukraine-is-running-out-of-options-and-russia-knows-it?traffic_source=rss already exists.
+2026-11-14 10:03:56,203 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/sports/2026/11/14/mohamed-salah-egypt-goals-record-africa-cup-of-nations-afcon-2027-qualifiers?traffic_source=rss already exists.
+2026-11-14 10:03:56,203 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/news/2026/11/14/philippine-court-orders-arrest-of-jailed-us-wanted-celebrity-preacher?traffic_source=rss already exists.
+2026-11-14 10:03:56,203 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/news/2026/11/14/siege-fuels-disease-fears-in-yemens-besieged-taiz?traffic_source=rss already exists.
+2026-11-14 10:03:56,593 - INFO - [Al Jazeera] Article: https://www.aljazeera.com/news/2026/11/14/could-one-daily-pill-narrow-the-diabetes-treatment-gap-in-the-global-south?traffic_source=rss
+2026-11-14 10:03:56,594 - INFO - [Al Jazeera] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:03:56,816 - INFO - [Al Jazeera] Success with 'requests_browser'. Found content (1638 words).
+2026-11-14 10:03:59,385 - INFO - >>> SUCCESSFULLY SAVED [ID: 152853] - Keralam Government to buy new vehicles for Ministers and Chief Secretary from The Hindu (342 words)
+2026-11-14 10:03:59,391 - INFO - [Wired] Early skip: URL https://www.wired.com/story/outlook-went-down-microsoft-may-owe-you-money/ already exists.
+2026-11-14 10:03:59,392 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/dell-coupon-code/
+2026-11-14 10:03:59,392 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/paramount-plus-coupon-code/
+2026-11-14 10:03:59,787 - INFO - [Wired] Early skip: URL https://www.wired.com/story/disney-plus-discounts/ already exists.
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/canon-promo-code/
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/wayfair-promo-code/
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/klook-promo-code/
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/lg-promo-code/
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/whoop-promo-code/
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/samsung-promo-codes/
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/tuft-and-needle-promo-code/
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/womanizer-coupon/
+2026-11-14 10:03:59,787 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/abt-promo-code/
+2026-11-14 10:03:59,788 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/playstation-discount-code/
+2026-11-14 10:03:59,788 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/adidas-promo-code/
+2026-11-14 10:03:59,788 - INFO - [Wired] Early skip: URL https://www.wired.com/story/the-faa-nationwide-ground-stop-is-over/ already exists.
+2026-11-14 10:03:59,788 - INFO - [Wired] Early skip: URL https://www.wired.com/story/best-early-black-friday-airpods-deals-11-13-2026/ already exists.
+2026-11-14 10:03:59,788 - INFO - [Wired] Early skip: URL https://www.wired.com/story/faa-grounds-all-us-flights-until-further-notice/ already exists.
+2026-11-14 10:03:59,788 - INFO - [Wired] Early skip: URL https://www.wired.com/story/atlas-coffee-club-black-friday-2026/ already exists.
+2026-11-14 10:03:59,788 - INFO - [Wired] Early skip: URL https://www.wired.com/story/best-early-black-friday-mattress-deals-11-13-2026/ already exists.
+2026-11-14 10:03:59,789 - INFO - [Wired] Early skip: URL https://www.wired.com/story/microsoft-365-crawls-back-to-life-after-a-24-hour-outage/ already exists.
+2026-11-14 10:03:59,793 - INFO - [Wired] Early skip: URL https://www.wired.com/story/the-microsoft-outage-is-a-warning-for-the-world/ already exists.
+2026-11-14 10:03:59,793 - INFO - [Wired] Early skip: URL https://www.wired.com/story/jensen-huang-and-the-end-of-the-founder-fairy-tale/ already exists.
+2026-11-14 10:04:00,542 - INFO - [Wired] Early skip: URL https://www.wired.com/story/best-walking-pads/ already exists.
+2026-11-14 10:04:00,921 - INFO - [Wired] Early skip: URL https://www.wired.com/review/tcl-qm7l/ already exists.
+2026-11-14 10:04:00,921 - INFO - [Wired] Early skip: URL https://www.wired.com/story/black-roles-are-disappearing-in-hollywood-this-startup-is-using-ai-microdramas-to-fight-back/ already exists.
+2026-11-14 10:04:00,921 - INFO - [Wired] Early skip: URL https://www.wired.com/story/even-black-friday-2026-will-be-more-expensive-than-usual/ already exists.
+2026-11-14 10:04:00,921 - INFO - [Wired] Early skip: URL https://www.wired.com/story/a-servant-class-not-a-working-class-stephen-millers-biographer-on-what-comes-next/ already exists.
+2026-11-14 10:04:00,921 - INFO - [Wired] Early skip: URL https://www.wired.com/story/exclusive-apple-tv-neuromancer-creator-interviews/ already exists.
+2026-11-14 10:04:00,922 - INFO - [Wired] Early skip: URL https://www.wired.com/story/cybertruck-fans-demand-answers-from-elon-musk-about-the-vehicles-demise/ already exists.
+2026-11-14 10:04:00,922 - INFO - [Wired] Early skip: URL https://www.wired.com/story/nasa-wants-to-keep-the-hubble-space-telescope-afloat/ already exists.
+2026-11-14 10:04:00,922 - INFO - [Wired] Early skip: URL https://www.wired.com/review/bitdefender-antivirus-plus/ already exists.
+2026-11-14 10:04:00,922 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/gametime-promo-code/
+2026-11-14 10:04:00,922 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/kerala/from-glory-to-gloom-manchester-uniteds-fall-leaves-keralam-fans-heartbroken/article71701276.ece
+2026-11-14 10:04:00,922 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:04:01,306 - INFO - [Times of India] Page content loaded.
+2026-11-14 10:04:01,308 - INFO - [Wired] Early skip: URL https://www.wired.com/story/instacart-promo/code/ already exists.
+2026-11-14 10:04:01,308 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/peacock-promo-code/
+2026-11-14 10:04:01,308 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/western-digital-promo-code/
+2026-11-14 10:04:01,308 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/logitech-promo-code/
+2026-11-14 10:04:01,308 - INFO - [Wired] Skipping filtered URL: https://www.wired.com/story/chatbooks-promo-code/
+2026-11-14 10:04:01,308 - INFO - [Wired] Early skip: URL https://www.wired.com/story/nvidia-employees-petition-for-jensen-huangs-return/ already exists.
+2026-11-14 10:04:01,308 - INFO - [Wired] Early skip: URL https://www.wired.com/story/best-early-black-friday-robot-vacuum-deals-roborock-2026/ already exists.
+2026-11-14 10:04:01,308 - INFO - [Wired] Early skip: URL https://www.wired.com/story/mint-mobile-phone-deal-november-2026/ already exists.
+2026-11-14 10:04:01,309 - INFO - [Wired] Early skip: URL https://www.wired.com/story/silicon-valley-is-still-defending-jensen-huang/ already exists.
+2026-11-14 10:04:01,309 - INFO - [Wired] Early skip: URL https://www.wired.com/story/early-black-friday-tv-deals-11-12-26/ already exists.
+2026-11-14 10:04:01,309 - INFO - [Wired] Early skip: URL https://www.wired.com/story/uncanny-valley-podcast-jensen-huang-is-out-will-nvidias-rivals-cash-in/ already exists.
+2026-11-14 10:04:01,309 - INFO - [Wired] Early skip: URL https://www.wired.com/story/walmart-black-friday-deals-gifts-2026/ already exists.
+2026-11-14 10:04:01,309 - INFO - [Wired] Early skip: URL https://www.wired.com/story/jensen-huang-colette-kress-replacement-powerful-women-in-tech/ already exists.
+2026-11-14 10:04:01,309 - INFO - [Wired] Early skip: URL https://www.wired.com/story/major-microsoft-outlook-outage-hits-365-customers-north-america/ already exists.
+2026-11-14 10:04:01,309 - INFO - [Wired] Early skip: URL https://www.wired.com/story/climate-change-abolishes-ice/ already exists.
+2026-11-14 10:04:01,309 - INFO - [Wired] (Thread) Finished. Shutting down its Selenium driver.
+2026-11-14 10:04:01,445 - INFO - [The Hindu] Success with 'requests_browser'. Found content (440 words).
+2026-11-14 10:04:01,488 - INFO - [Wired] driver.quit() successful.
+2026-11-14 10:04:04,206 - INFO - >>> SUCCESSFULLY SAVED [ID: 152854] - Over 500 Questioned, 20 Detained In Terrorist Attack On CRPF Camp In Kulgam from NDTV (376 words)
+2026-11-14 10:04:06,949 - INFO - >>> SUCCESSFULLY SAVED [ID: 152855] - S Naren’s art of contra investing: HDFC Bank, Natco Pharma, other 7 top picks down up to 39% from 52-week highs. What this means from Economic Times (778 words)
+2026-11-14 10:04:07,700 - INFO - [NDTV] Article: https://www.ndtv.com/india-news/congress-vs-congress-dk-shivakumars-mekedatu-dam-push-riles-up-party-in-tamil-nadu-12325674#publisher=newsstand
+2026-11-14 10:04:07,702 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:04:07,727 - INFO - [Times of India] Success with 'selenium_browser'. Found content (540 words).
+2026-11-14 10:04:09,519 - ERROR - [Indian Express] Request failed for strategy 'selenium_browser' on URL https://indianexpress.com/article/cities/delhi/delhi-meerut-namo-bharat-limited-stop-fast-trains-peak-hours-schedule-ncrtc-10962955/: Message: timeout: Timed out receiving message from renderer: 7.000
+  (Session info: chrome=157.0.8103.78)
+Stacktrace:
+#0 0x5650e8d84caa <unknown>
+#1 0x5650e86b8cc5 <unknown>
+#2 0x5650e86a8b32 <unknown>
+#3 0x5650e86a88a6 <unknown>
+#4 0x5650e86a702b <unknown>
+#5 0x5650e86a743f <unknown>
+#6 0x5650e86b29d6 <unknown>
+#7 0x5650e86c3b90 <unknown>
+#8 0x5650e86c999b <unknown>
+#9 0x5650e86a7d17 <unknown>
+#10 0x5650e86a7a38 <unknown>
+#11 0x5650e86c3a53 <unknown>
+#12 0x5650e873a9fc <unknown>
+#13 0x5650e86f5557 <unknown>
+#14 0x5650e86f486e <unknown>
+#15 0x5650e86f5341 <unknown>
+#16 0x5650e8d4779c <unknown>
+#17 0x5650e8d45fcd <unknown>
+#18 0x5650e8d30df5 <unknown>
+#19 0x5650e8d46c0a <unknown>
+#20 0x5650e8d19b99 <unknown>
+#21 0x5650e8d6f318 <unknown>
+#22 0x5650e8d6f4b5 <unknown>
+#23 0x5650e8d83633 <unknown>
+#24 0x7f8fbb49cb84 <unknown>
+#25 0x7f8fbb529ecc <unknown>
+
+2026-11-14 10:04:10,293 - WARNING - [Indian Express] Rebuilding Selenium driver after renderer timeout.
+2026-11-14 10:04:10,518 - INFO - >>> SUCCESSFULLY SAVED [ID: 152856] - World Diabetes Day: Closing the treatment gap with one daily pill from Al Jazeera (1638 words)
+2026-11-14 10:04:10,902 - INFO - [Economic Times] Article: https://economictimes.indiatimes.com/markets/stocks/earnings/patanjali-foods-q2-results-net-profit-falls-19-yoy-to-rs-420-crore-revenue-rises-16/articleshow/135829006.cms
+2026-11-14 10:04:10,903 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:04:10,903 - INFO - [Economic Times] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:04:10,908 - INFO - [Indian Express] driver.quit() successful.
+2026-11-14 10:04:13,414 - INFO - Selenium driver initialized successfully (Eager load, 7s timeout, images off).
+2026-11-14 10:04:13,414 - INFO - >>> SUCCESSFULLY SAVED [ID: 152857] - From glory to gloom: Manchester United's fall leaves Keralam fans heartbroken from The Hindu (440 words)
+2026-11-14 10:04:13,414 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/sports/2026/11/14/jesus-de-miguel-death-goalkeeper-owono-12-match-ban-collision-tenerife-andorra?traffic_source=rss already exists.
+2026-11-14 10:04:13,415 - ERROR - [Indian Express] All scrape strategies failed for https://indianexpress.com/article/cities/delhi/delhi-meerut-namo-bharat-limited-stop-fast-trains-peak-hours-schedule-ncrtc-10962955/. Falling back to RSS description.
+2026-11-14 10:04:13,416 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/features/2026/11/14/paranoid-or-practical-britains-be-ready-citizen?traffic_source=rss already exists.
+2026-11-14 10:04:13,416 - WARNING - SKIPPED (GLOBAL WORD LIMIT): Article 'Anand Vihar-Ghaziabad in 8 minutes: Namo Bharat corridor to get 8 fast trains from Monday' from Indian Express has only 3 words (Min: 90).
+2026-11-14 10:04:13,416 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/news/2026/11/14/faa-ground-stop-disrupts-nba-nhl-and-college-football-weekend-travel?traffic_source=rss already exists.
+2026-11-14 10:04:13,417 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/news/2026/11/14/trump-xi-and-putin-to-hold-first-three-way-summit-in-china?traffic_source=rss already exists.
+2026-11-14 10:04:13,417 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/news/2026/11/14/lagos-art-week-confronts-history-identity-and-belonging?traffic_source=rss already exists.
+2026-11-14 10:04:13,417 - INFO - [Al Jazeera] Early skip: URL https://www.aljazeera.com/news/2026/11/14/german-spies-granted-sweeping-new-powers?traffic_source=rss already exists.
+2026-11-14 10:04:13,417 - INFO - [Al Jazeera] (Thread) Finished. Shutting down its Selenium driver.
+2026-11-14 10:04:13,465 - INFO - [NDTV] Success with 'selenium_browser'. Found content (974 words).
+2026-11-14 10:04:13,532 - INFO - [Al Jazeera] driver.quit() successful.
+2026-11-14 10:04:16,160 - INFO - >>> SUCCESSFULLY SAVED [ID: 152858] - US flight chaos in photos: Long queues, crowded terminals and thousands of passengers in limbo from Times of India (540 words)
+2026-11-14 10:04:16,969 - INFO - [Indian Express] Article: https://indianexpress.com/article/explained/explained-sports/ball-tampering-cricket-science-history-methods-rules-explained-10962939/
+2026-11-14 10:04:16,969 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:04:17,374 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/karnataka/scst-quota-enhancement-karnataka-recommends-inclusion-of-law-in-9th-schedule/article66654566.ece
+2026-11-14 10:04:17,374 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:04:17,400 - INFO - [Economic Times] Success with 'requests_browser'. Found content (800 words).
+2026-11-14 10:04:18,269 - INFO - [Times of India] Article: https://timesofindia.indiatimes.com/world/us/after-losing-his-eldest-son-in-a-2008-accident-australian-mechanic-gavin-hynam-began-restoring-old-cars-for-young-people-in-need-he-had-donated-at-least-19-cars-by-2025-and-has-now-received-a-state-honour/articleshow/135823547.cms
+2026-11-14 10:04:18,269 - INFO - [Times of India] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:04:18,308 - INFO - [The Hindu] Success with 'requests_browser'. Found content (198 words).
+2026-11-14 10:04:21,135 - INFO - >>> SUCCESSFULLY SAVED [ID: 152859] - PM Modi By His Side, DK Shivakumar Pushes For Mekedatu Dam, Triggers Congress vs Congress from NDTV (974 words)
+2026-11-14 10:04:23,893 - INFO - >>> SUCCESSFULLY SAVED [ID: 152860] - Patanjali Foods Q2 Results: Net profit falls 19% YoY to Rs 420 crore, revenue rises 16% from Economic Times (800 words)
+2026-11-14 10:04:24,708 - INFO - [NDTV] Article: https://www.ndtv.com/india-news/50-000-cap-10-5-pm-window-delhi-polices-ramlila-ground-gathering-draft-12325848#publisher=newsstand
+2026-11-14 10:04:24,708 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:04:25,124 - INFO - [Economic Times] Article: https://economictimes.indiatimes.com/markets/stocks/news/concurrent-gainers-8-stocks-gain-for-5-days-in-a-row/consistent-performers/slideshow/135828499.cms
+2026-11-14 10:04:25,124 - INFO - [Economic Times] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:04:27,938 - INFO - [Times of India] Page content loaded.
+2026-11-14 10:04:27,942 - INFO - >>> SUCCESSFULLY SAVED [ID: 152861] - SC/ST quota enhancement: Karnataka recommends inclusion of law in 9th Schedule from The Hindu (198 words)
+2026-11-14 10:04:28,762 - WARNING - [Economic Times] FAILED with 'requests_browser' (content was too short: 70 words).
+2026-11-14 10:04:28,867 - INFO - [Times of India] Success with 'selenium_browser'. Found content (664 words).
+2026-11-14 10:04:30,297 - INFO - [Economic Times] Article: https://economictimes.indiatimes.com/markets/stocks/news/concurrent-gainers-8-stocks-gain-for-5-days-in-a-row/consistent-performers/slideshow/135828499.cms
+2026-11-14 10:04:30,297 - INFO - [Economic Times] Attempt 2/2: Trying with 'selenium_browser' strategy...
+2026-11-14 10:04:31,740 - INFO - >>> SUCCESSFULLY SAVED [ID: 152862] - After losing his eldest son in a 2008 accident, Australian mechanic Gavin Hynam began restoring old cars for young people in need; he had donated at least 19 cars by 2025 and has now received a state honour from Times of India (664 words)
+2026-11-14 10:04:32,491 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:04:32,495 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/punjab/will-contest-from-chamkaur-sahib-at-any-cost-says-dropped-aap-mla-charanjit-singh/article71701255.ece
+2026-11-14 10:04:32,495 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:04:32,640 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/jd-vance-weighs-skipping-2028-presidential-race-after-republican-midterm-losses-report/articleshow/135825647.cms already exists.
+2026-11-14 10:04:32,641 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/a-michigan-dad-who-delivers-frozen-pizzas-was-mocked-by-a-prankster-strangers-donated-784000-to-help-his-family-and-then-he-asked-them-to-stop-and-give-to-other-families-and-charities-instead/articleshow/135754720.cms already exists.
+2026-11-14 10:04:32,641 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/meet-mary-engle-pennington-denied-a-university-degree-because-she-was-a-woman-who-went-on-to-transform-americas-food-safety-standards-and-revolutionise-the-refrigeration-of-milk-eggs-and-meat-/articleshow/135678960.cms already exists.
+2026-11-14 10:04:32,641 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/the-trump-administration-has-proposed-selling-parts-of-americas-federal-land-holdings-to-states-tribes-and-local-governments-under-a-new-five-year-plan-but-has-not-identified-which-parcels-could-be-sold/articleshow/135758030.cms already exists.
+2026-11-14 10:04:32,641 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/uk/at-13-prince-george-is-following-in-king-charless-artistic-footsteps-his-colourful-kingfisher-drawing-created-at-home-in-windsor-has-now-been-unveiled-in-prince-williams-magazine/articleshow/135824092.cms already exists.
+2026-11-14 10:04:32,641 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/a-california-beach-town-facing-disappearing-sand-and-repeated-disruption-to-a-coastal-railway-voted-down-a-proposed-tax-that-could-have-raised-15-million-a-year-leaving-officials-to-find-another-way-to-fund-repairs/articleshow/135726847.cms already exists.
+2026-11-14 10:04:32,641 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/meet-anthony-woo-the-teenage-co-founder-of-torus-a-free-curbside-composting-service-in-new-jersey-that-has-diverted-more-than-300000-pounds-of-food-waste-from-landfills/articleshow/135711341.cms already exists.
+2026-11-14 10:04:32,642 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/south-asia/sheikh-hasinas-return-to-bangladesh-india-wants-dhaka-to-fulfil-two-conditions-says-report/articleshow/135824475.cms already exists.
+2026-11-14 10:04:32,645 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/a-73-year-old-texas-law-professor-collapsed-during-class-and-stopped-breathing-a-navy-seal-veteran-in-his-classroom-performed-three-rounds-of-cpr-and-the-professor-has-now-returned-to-teaching-after-surviving/articleshow/135822693.cms already exists.
+2026-11-14 10:04:32,645 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/real-estate/news/mick-jagger-bought-an-18th-century-french-chateau-for-about-477000-in-1980-its-50-acre-estate-has-a-recording-studio-used-by-the-rolling-stones/articleshow/135683777.cms already exists.
+2026-11-14 10:04:32,645 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/trump-putin-and-xi-to-hold-unprecedented-trilateral-meet-whats-on-agenda/articleshow/135822661.cms already exists.
+2026-11-14 10:04:32,650 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/a-new-jersey-theatre-nearly-faced-demolition-in-the-1980s-but-volunteers-refused-to-abandon-it-after-a-130-million-restoration-the-1929-landmark-has-reopened-ahead-of-its-first-concert-on-13-november/articleshow/135740042.cms already exists.
+2026-11-14 10:04:32,658 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/in-1985-willie-nelson-joined-two-musicians-to-launch-farm-aid-as-us-family-farms-struggled-41-years-later-the-annual-concerts-and-wider-campaign-have-raised-over-90-million-to-support-farmers-and-rural-communities/articleshow/135578165.cms already exists.
+2026-11-14 10:04:32,658 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/marilyn-monroes-never-before-seen-letters-and-personal-belongings-emerge-from-a-friends-estate-after-60-years-including-notes-on-arthur-miller-joe-dimaggio-and-her-private-struggles/articleshow/135763859.cms already exists.
+2026-11-14 10:04:32,658 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/after-hundreds-of-complaints-about-smells-resembling-rotten-eggs-sewage-and-decaying-meat-a-chicago-judge-orders-an-animal-feed-plant-to-halt-odour-causing-operations-until-january-2027/articleshow/135707910.cms already exists.
+2026-11-14 10:04:32,658 - INFO - [Times of India] Early skip: URL https://timesofindia.indiatimes.com/world/us/drone-sightings-trigger-security-response-at-us-airbase-in-britain-amid-spate-of-incidents/articleshow/135821301.cms already exists.
+2026-11-14 10:04:32,658 - INFO - [Times of India] (Thread) Finished. Shutting down its Selenium driver.
+2026-11-14 10:04:32,718 - INFO - [The Hindu] Success with 'requests_browser'. Found content (636 words).
+2026-11-14 10:04:32,883 - INFO - [Times of India] driver.quit() successful.
+2026-11-14 10:04:32,970 - INFO - [NDTV] Success with 'selenium_browser'. Found content (341 words).
+2026-11-14 10:04:35,739 - INFO - >>> SUCCESSFULLY SAVED [ID: 152863] - Will contest from Chamkaur Sahib at any cost, says dropped AAP MLA Charanjit Singh from The Hindu (636 words)
+2026-11-14 10:04:38,472 - INFO - [Economic Times] Page content loaded.
+2026-11-14 10:04:38,473 - INFO - >>> SUCCESSFULLY SAVED [ID: 152864] - 50,000 Cap, 10 AM-5 PM Window: Delhi Police's Ramlila Ground Gathering Draft from NDTV (341 words)
+2026-11-14 10:04:38,474 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/telangana/hydraa-to-take-up-stepwell-restorations-to-help-water-conservation-measures-in-hyderabad/article71701018.ece already exists.
+2026-11-14 10:04:39,344 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/arunachal-pradesh/sacred-buddha-relics-arrive-in-arunachals-namsai-for-exposition/article71701279.ece
+2026-11-14 10:04:39,345 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/opinion/sonia-gandhi-belonging-and-why-this-story-lies-on-other-side-of-politics-by-shashi-tharoor-12325282#publisher=newsstand already exists.
+2026-11-14 10:04:39,346 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:04:39,783 - INFO - [NDTV] Article: https://www.ndtv.com/india-news/cop-shot-at-while-trying-to-arrest-suspect-in-bengal-birbhum-accused-flees-12325791#publisher=newsstand
+2026-11-14 10:04:39,783 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:04:39,935 - INFO - [The Hindu] Success with 'requests_browser'. Found content (546 words).
+2026-11-14 10:04:42,896 - INFO - >>> SUCCESSFULLY SAVED [ID: 152865] - Sacred Buddha relics arrive in Arunachal’s Namsai for exposition from The Hindu (546 words)
+2026-11-14 10:04:42,917 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:04:43,015 - INFO - [Economic Times] Success with 'selenium_browser'. Found content (116 words).
+2026-11-14 10:04:43,273 - INFO - [NDTV] Success with 'selenium_browser'. Found content (303 words).
+2026-11-14 10:04:45,970 - INFO - >>> SUCCESSFULLY SAVED [ID: 152866] - Concurrent Gainers: 8 stocks gain for 5 days in a row - ​Consistent performers from Economic Times (116 words)
+2026-11-14 10:04:45,976 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/jawaharlal-nehru-birth-anniversary-congress-tribute-gandhi/article71700962.ece already exists.
+2026-11-14 10:04:46,782 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/tamil-nadu/tanker-carrying-40000-litres-of-ethanol-to-kochi-overturns-near-coimbatore/article71701185.ece
+2026-11-14 10:04:46,783 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:04:46,789 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/economy/policy/rbi-special-windows-seen-big-enough-to-bring-in-100b/articleshow/132813309.cms
+2026-11-14 10:04:46,790 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/economy/foreign-trade/india-canada-aim-to-conclude-cepa-trade-pact-by-end-2026-mea/articleshow/132813105.cms
+2026-11-14 10:04:46,798 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/economy/infrastructure/govts-urban-reset-centre-divides-ministry-of-housing-and-urban-affairs-into-two-specialised-verticals/articleshow/132812900.cms
+2026-11-14 10:04:46,799 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/economy/foreign-trade/india-uk-ceta-takes-effect-first-zero-duty-indian-coffee-jewellery-consignments-reach-uk-shores/articleshow/132442764.cms
+2026-11-14 10:04:46,800 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/economy/foreign-trade/from-oman-to-tanzania-how-the-iran-war-is-redrawing-indias-trade-map/articleshow/131762760.cms
+2026-11-14 10:04:46,800 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/economy/policy/fm-sitharaman-flags-global-crisis-spillovers-unfair-burden-on-developing-nations/articleshow/131668427.cms
+2026-11-14 10:04:46,800 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/tech/technology/apple-faces-indian-engineers-bias-lawsuit/articleshow/81694292.cms
+2026-11-14 10:04:46,806 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/defence/despite-transatlantic-love-fest-eu-charts-third-way-in-ties-with-us-and-china/articleshow/81467467.cms
+2026-11-14 10:04:46,806 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/tech/tech-bytes/twitters-india-policy-head-to-step-down-will-transition-in-march/articleshow/80732868.cms
+2026-11-14 10:04:46,806 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/tech/tech-and-gadgets/govt-may-keep-rs-7500-cr-outlay-for-it-hardware-manufacturing-under-pli-scheme/articleshow/80333429.cms
+2026-11-14 10:04:46,807 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/tech/technology/indian-dating-apps-services-see-surge-of-paying-users-in-small-cities/articleshow/80063342.cms
+2026-11-14 10:04:46,807 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/tech/technology/time-for-govt-cos-to-adopt-ai-deloitte-india/articleshow/79981215.cms
+2026-11-14 10:04:46,812 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/international/world-news/us-asks-iraq-to-shut-most-iran-border-crossings-iraqi-foreign-minister-says-iran-war/articleshow/135668826.cms
+2026-11-14 10:04:46,813 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/international/world-news/nepal-rescuers-continue-search-for-missing-as-identification-of-dead-remains-challenge/articleshow/133849891.cms
+2026-11-14 10:04:46,813 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/international/global-trends/trump-1-coins-aka-golden-dollar-are-here-minus-the-gold-the-us-mint-is-putting-the-sitting-presidents-face-on-american-money-for-the-first-time/articleshow/133713717.cms
+2026-11-14 10:04:46,813 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/international/world-news/trump-announces-a-deal-for-hamas-to-disarm-in-gaza-but-many-hurdles-and-uncertainty-remain/articleshow/132753009.cms
+2026-11-14 10:04:46,813 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/new-updates/in-1943-us-built-an-entire-city-and-it-didnt-exist-on-a-single-map/articleshow/132659427.cms
+2026-11-14 10:04:46,814 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/new-updates/humans-have-a-third-eye-in-the-brain-study-links-it-to-a-600-million-year-old-cyclops-ancestor/articleshow/132655441.cms
+2026-11-14 10:04:46,814 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/elections/assembly-elections/assam/done-deal-cm-himanta-biswa-sarma-on-nda-seat-sharing-for-assam-polls/articleshow/128678098.cms
+2026-11-14 10:04:46,814 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/elections/assembly-elections/bihar/rare-intensive-revision-in-bihar-four-months-before-polls/articleshow/122167501.cms
+2026-11-14 10:04:46,814 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/elections/assembly-elections/delhi/bjp-accuses-kejriwal-of-sending-voters-hoax-calls-to-mislead/articleshow/117579007.cms
+2026-11-14 10:04:46,814 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/elections/lok-sabha/india/lok-sabha-election-2024-maharashtra-get-interesting-after-splits-in-shiv-sena-ncp/articleshow/108559788.cms
+2026-11-14 10:04:46,814 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/elections/lok-sabha/india/modi-charisma-key-factor-in-bjps-bid-to-retain-all-26-seats-in-gujarat/articleshow/108550858.cms
+2026-11-14 10:04:46,814 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/elections/lok-sabha/india/implementation-of-guarantees-decline-of-brs-favour-congress-in-telangana-bjp-aiming-for-better-show/articleshow/108548569.cms
+2026-11-14 10:04:46,815 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/traders-bet-on-calendar-spread-as-nifty-moves-in-a-tight-range/articleshow/6302358.cms
+2026-11-14 10:04:46,821 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/nifty-may-find-support-at-5300-level/articleshow/6296017.cms
+2026-11-14 10:04:46,821 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/seven-out-of-top-10-asian-small-cap-funds-are-indian/articleshow/6295976.cms
+2026-11-14 10:04:46,821 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/inflation-reflects-growth-dynamics-in-india-christopher-wood/articleshow/6274053.cms
+2026-11-14 10:04:46,821 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/market-may-trade-in-a-range-but-fiis-seen-sold-on-india/articleshow/6277705.cms
+2026-11-14 10:04:46,821 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/dont-bank-only-on-price-to-earning-ratio/articleshow/6278228.cms
+2026-11-14 10:04:46,826 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/recos/prabhudas-lilladher-has-a-reduce-rating-on-infosys/articleshow/3798718.cms
+2026-11-14 10:04:46,826 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/recos/fin-crisis-too-late-and-too-little-done-in-us/articleshow/3794549.cms
+2026-11-14 10:04:46,826 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/forex/weak-rupee-takes-its-toll-on-cos-with-huge-foreign-debt/articleshow/3546158.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/recos/wait-for-more-signals-before-turning-positive/articleshow/3292640.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/company/corporate-trends/six-indian-cos-among-businessweeks-top-100-infotech-firms/articleshow/3189334.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/news/company/corporate-trends/indian-firms-slip-in-global-ranking-four-move-out-of-top-500/articleshow/3177077.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/big-daddy-laps-up-cipla-after-q1-nos-beat-forecast/articleshow/6308646.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/old-fox-has-dream-run-on-dalal-street/articleshow/6308631.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/cairn-india-hits-record-high-on-bse-amid-stake-sale-talks/articleshow/6306679.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/vedanta-plunges-5-59-per-cent-on-lse-amid-talks-to-buy-cairn-stake/articleshow/6306526.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/sbi-shares-on-gaining-spree-hit-record-high/articleshow/6306241.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/fm-must-rethink/articleshow/5645094.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/amalgamate-banks/articleshow/5645086.cms
+2026-11-14 10:04:46,827 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/managing-data/articleshow/5117958.cms
+2026-11-14 10:04:46,828 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/right-technology/articleshow/5117957.cms
+2026-11-14 10:04:46,828 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/et-search/articleshow/21646857.cms
+2026-11-14 10:04:46,828 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/after-the-oscars-whats-next-for-silent-stars-of-the-artist/articleshow/12075465.cms
+2026-11-14 10:04:46,828 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/delhi-world-book-fair-a-fair-like-no-other/articleshow/12028630.cms
+2026-11-14 10:04:46,828 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/lk-advanis-gift-makes-its-way-to-state-department-exhibition-hall/articleshow/12017534.cms
+2026-11-14 10:04:46,828 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/india-meteorological-department-to-use-dynamic-models-for-forecasts/articleshow/11983844.cms
+2026-11-14 10:04:46,828 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/documents-reveal-contents-of-the-first-telegraph-message-between-india-england/articleshow/11976488.cms
+2026-11-14 10:04:46,830 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/worried-amitabh-bachchan-fans-pray-to-lord-shiva-for-his-recovery/articleshow/11963187.cms
+2026-11-14 10:04:46,830 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/opinion/interviews/every-decision-of-government-neednt-be-a-big-reform-anand-mahindra/articleshow/35919571.cms
+2026-11-14 10:04:46,831 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/opinion/interviews/narendra-modi-has-his-eyes-set-on-boosting-business-joao-cravinho-eu-ambassador/articleshow/35973824.cms
+2026-11-14 10:04:46,831 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/opinion/interviews/confidence-level-of-industry-improving-kv-kamath-icici-bank/articleshow/35945669.cms
+2026-11-14 10:04:46,831 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/opinion/interviews/we-may-see-rapid-growth-over-the-next-few-years-raamdeo-agrawal/articleshow/35831378.cms
+2026-11-14 10:04:46,832 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/opinion/interviews/our-commitment-for-press-freedom-and-autonomy-of-public-broadcast-is-absolute-prakash-javadekar/articleshow/35803396.cms
+2026-11-14 10:04:46,832 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/opinion/interviews/there-is-a-leadership-vacuum-in-infosys-time-to-get-nandan-nilekani-back-mohandas-pai/articleshow/35716682.cms
+2026-11-14 10:04:46,832 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/mf/mf-news/et-wealth-expo-how-should-investors-deploy-rs-10-lakh-over-next-10-years-prateek-agrawal-of-motilal-oswal-amc-explains/articleshow/135420964.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/can-nifty-sensex-extend-gains-after-rallying-up-to-2-last-week-4-factors-to-watch-on-monday/articleshow/135419919.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/earnings/itc-q2-results-preview-profit-seen-falling-nearly-30-yoy-as-cigarette-tax-hikes-bite/articleshow/135419165.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/msci-rebalancing-on-monday-adani-energy-groww-set-for-big-inflows-ril-jio-financial-may-face-outflows/articleshow/133626232.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/nifty-weekly-outlook-nifty-trapped-in-23900-24750-range-fresh-buying-should-remain-selective/articleshow/133624648.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/fpis-turn-buyers-for-second-straight-month-invest-rs-30919-cr-in-august/articleshow/133624069.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/alfa-laval-raises-delisting-price-to-rs-2850-a-share/articleshow/11437373.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/db-realty-unitech-stocks-rose-after-top-executives-granted-bail-in-2g-scam/articleshow/10925114.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/fitch-withdraws-reliance-capital-ratings/articleshow/10430814.cms
+2026-11-14 10:04:46,833 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/discoms-poor-financial-health-poses-risks-for-power-traders-fitch/articleshow/10430186.cms
+2026-11-14 10:04:46,834 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/cigarette-companies-price-hikes-with-higher-volumes-hold-promise/articleshow/9277179.cms
+2026-11-14 10:04:46,834 - INFO - [Economic Times] Skipping stale item (> 3d old): https://economictimes.indiatimes.com/markets/stocks/news/lovable-lingeries-dream-run-on-as-traders-lap-it-up/articleshow/8894615.cms
+2026-11-14 10:04:46,834 - INFO - [Economic Times] (Thread) Finished. Shutting down its Selenium driver.
+2026-11-14 10:04:46,923 - INFO - [Economic Times] driver.quit() successful.
+2026-11-14 10:04:46,949 - INFO - [The Hindu] Success with 'requests_browser'. Found content (182 words).
+2026-11-14 10:04:49,755 - INFO - >>> SUCCESSFULLY SAVED [ID: 152867] - Cop Shot At While Trying To Arrest Suspect In Bengal, Accused Flees from NDTV (303 words)
+2026-11-14 10:04:52,454 - INFO - >>> SUCCESSFULLY SAVED [ID: 152868] - Tanker carrying 40,000 litres of ethanol to Kochi overturns near Coimbatore from The Hindu (182 words)
+2026-11-14 10:04:53,208 - INFO - [NDTV] Article: https://www.ndtv.com/business-news/the-joy-of-just-because-why-are-indians-buying-gifts-beyond-weddings-birthdays-and-festivals-12321600#publisher=newsstand
+2026-11-14 10:04:53,208 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:04:53,430 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/cities/Madurai/driver-from-theni-found-dead-while-in-custody-at-chekkanoorani-police-station-in-madurai/article71700865.ece already exists.
+2026-11-14 10:04:53,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/west-bengal/tmcs-abhishek-appears-at-police-station-for-questioning-over-social-media-post/article71701190.ece already exists.
+2026-11-14 10:04:53,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/telangana/rahul-gandhi-promises-social-security-insurance-cover-for-gig-workers-in-telangana/article71701082.ece already exists.
+2026-11-14 10:04:53,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/jammu-and-kashmir/kulgam-crpf-post-attack-in-kashmir-several-suspects-questioned/article71697164.ece already exists.
+2026-11-14 10:04:53,807 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/tamil-nadu/series-of-security-lapses-led-to-burglary-at-tanishq-showroom-in-madurai/article71699245.ece
+2026-11-14 10:04:53,807 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:04:53,886 - INFO - [The Hindu] Success with 'requests_browser'. Found content (457 words).
+2026-11-14 10:04:56,829 - INFO - >>> SUCCESSFULLY SAVED [ID: 152869] - Series of security lapses led to burglary at Tanishq showroom in Madurai from The Hindu (457 words)
+2026-11-14 10:04:56,841 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:04:56,947 - INFO - [NDTV] Success with 'selenium_browser'. Found content (1035 words).
+2026-11-14 10:04:59,709 - INFO - >>> SUCCESSFULLY SAVED [ID: 152870] - The Joy Of 'Just Because': Why Are Indians Buying Gifts Beyond Weddings, Birthdays And Festivals from NDTV (1035 words)
+2026-11-14 10:05:00,455 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/karnataka/cftri-initiative-aims-to-standardise-micronutrient-testing-in-fortified-rice/article71701193.ece
+2026-11-14 10:05:00,455 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:05:00,853 - INFO - [NDTV] Article: https://www.ndtv.com/india-news/creating-doubt-ex-cbi-rakesh-asthana-on-sonia-gandhi-memoir-mention-of-godhra-riots-disputed-12325760#publisher=newsstand
+2026-11-14 10:05:00,854 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:05:00,883 - INFO - [The Hindu] Success with 'requests_browser'. Found content (484 words).
+2026-11-14 10:05:03,499 - INFO - >>> SUCCESSFULLY SAVED [ID: 152871] - CFTRI initiative aims to standardise micronutrient testing in fortified rice from The Hindu (484 words)
+2026-11-14 10:05:03,500 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:05:03,630 - INFO - [NDTV] Success with 'selenium_browser'. Found content (507 words).
+2026-11-14 10:05:06,207 - WARNING - [Indian Express] Page explicit wait timed out (3s). Proceeding anyway.
+2026-11-14 10:05:06,429 - INFO - >>> SUCCESSFULLY SAVED [ID: 152872] - "Creating Doubt": Ex-CBI Official On Sonia Gandhi's Mention Of Godhra Riots from NDTV (507 words)
+2026-11-14 10:05:06,429 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/india-supports-unga-resolution-on-permanent-sovereignty-of-palestinian-people/article71701074.ece already exists.
+2026-11-14 10:05:06,430 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/crpf-removes-jawan-from-service-for-posting-death-threat-to-commander-on-social-media/article71701093.ece already exists.
+2026-11-14 10:05:06,430 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/karnataka/v-xpress-building-key-logistics-hubs-in-karnataka-pic-saved/article71699166.ece already exists.
+2026-11-14 10:05:06,430 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/kerala/media-access-order-puts-mg-university-on-collision-course-with-minister/article71701033.ece already exists.
+2026-11-14 10:05:06,430 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/cities/Thiruvananthapuram/bjp-led-thiruvananthapuram-corporation-denies-permission-for-cultural-event-at-manaveeyam-veedhi/article71698913.ece already exists.
+2026-11-14 10:05:06,430 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/kerala/pwd-gets-268-crore-to-fortify-three-rehabilitation-sites-for-vallarpadam-project-evictees/article71701118.ece already exists.
+2026-11-14 10:05:06,430 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/jharkhand/two-booked-for-forcing-jharkhand-congress-mlas-minor-domestic-help-to-level-false-rape-charges-against-him/article71701140.ece already exists.
+2026-11-14 10:05:06,431 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/tamil-nadu/tn-cm-vijay-launches-distribution-of-cakes-greeting-cards-sweet-pongal-to-school-students-for-childrens-day/article71697560.ece already exists.
+2026-11-14 10:05:06,431 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/kerala/sanskrit-varsity-mock-funeral-row-pinarayi-vijayan-alleges-conspiracy-by-ex-governor-arlekar-v-c-against-sfi-activists/article71696898.ece already exists.
+2026-11-14 10:05:06,431 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/piyush-goyal-in-egypt-both-sides-to-discuss-increasing-cooperation-in-infra-manufacturing-logistics/article71701055.ece already exists.
+2026-11-14 10:05:06,431 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/life-and-style/travel/twenty-four-hours-in-ahmedabad-a-quick-guide-to-indias-first-unesco-world-heritage-city/article71686532.ece already exists.
+2026-11-14 10:05:06,431 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/pm-modi-pays-tributes-to-first-prime-minister-nehru-on-birth-anniversary/article71701002.ece already exists.
+2026-11-14 10:05:06,431 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/entertainment/music/shillong-cherry-blossom-festival-2026-nelly-khalid-and-swae-lee-headline-two-days-of-music/article71692760.ece already exists.
+2026-11-14 10:05:06,431 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/mahadev-betting-app-case-cbi-searches-in-6-states-lead-to-recovery-of-digital-devices-key-documents/article71701007.ece already exists.
+2026-11-14 10:05:06,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/rajasthan/rajasthan-panchayat-local-elections-2026-final-phase-voting/article71700929.ece already exists.
+2026-11-14 10:05:06,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/why-has-centre-sanctioned-fresh-infrastructure-along-the-china-border-in-arunachal-pradesh-explained/article71700782.ece already exists.
+2026-11-14 10:05:06,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/assam/assam-accident-autopsy-of-dead-on-november-14-cm-to-visit-injured-meet-families-of-deceased/article71701016.ece already exists.
+2026-11-14 10:05:06,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/andhra-pradesh/low-pressure-area-forms-over-bay-of-bengal-likely-to-intensify-into-cyclonic-storm-around-november-16/article71699272.ece already exists.
+2026-11-14 10:05:06,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/uttarakhand/abvp-condemns-sexual-assault-on-haldwani-minor-girl-by-its-student-leader-and-three-others/article71701069.ece already exists.
+2026-11-14 10:05:06,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/kerala/kurumba-a-language-and-community-fighting-for-visibility/article71695235.ece already exists.
+2026-11-14 10:05:06,432 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/indian-envoy-slams-uscirf-over-sharjeel-imam-remarks-says-panel-has-no-locus-standi/article71700860.ece already exists.
+2026-11-14 10:05:06,433 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/kerala/police-fully-empowered-to-curb-drugs-and-substance-abuse-in-the-city-kerala-high-court/article71699531.ece already exists.
+2026-11-14 10:05:06,433 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/kerala/kerala-hc-directs-excise-commissioner-to-disclose-steps-taken-to-implement-prohibitory-measures-to-curb-underage-alcohol-consumption/article71699601.ece already exists.
+2026-11-14 10:05:06,433 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/telangana/electors-face-form-6-and-enumeration-form-quandary/article71700798.ece already exists.
+2026-11-14 10:05:06,433 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/madhya-pradesh/mp-adds-819-lakh-voters-since-final-sir-roll-electorate-rises-to-548-crore/article71701000.ece already exists.
+2026-11-14 10:05:06,433 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/former-v-p-jagdeep-dhankhar-discharged-from-aiims/article71700976.ece already exists.
+2026-11-14 10:05:06,433 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/society/how-a-masons-son-from-erode-won-a-medal-of-excellence-at-worldskills-2026/article71687410.ece already exists.
+2026-11-14 10:05:06,433 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/himachals-1500-allowance-scheme-who-benefits-and-whats-the-political-impact-explained/article71700979.ece already exists.
+2026-11-14 10:05:06,434 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/rahul-gandhi-habitual-liar-bjp-on-congress-leaders-phone-tapping-allegation/article71698080.ece already exists.
+2026-11-14 10:05:06,434 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/karnataka/dk-shivakumar-seeks-fairer-centre-state-cost-sharing-for-bengaluru-metro-faster-clearances/article71697681.ece already exists.
+2026-11-14 10:05:06,434 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/cities/kozhikode/multi-purpose-transit-yard-still-remains-paper-dreamin-kozhikode/article71700897.ece already exists.
+2026-11-14 10:05:06,434 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/ladakh/should-ladakh-be-hub-of-agitation-or-development-lahdc-ks-former-chief-executive-councillor/article71698682.ece already exists.
+2026-11-14 10:05:06,434 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/cities/mumbai/fake-journalist-arrested-in-navi-mumbai-19-lakh-housing-fraud-case-multiple-criminal-cases-registered-against-him/article71698172.ece already exists.
+2026-11-14 10:05:06,434 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/cities/kolkata/online-gamer-from-delhi-arrested-for-baranagar-womans-murder/article71698823.ece already exists.
+2026-11-14 10:05:06,434 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/why-are-international-airlines-being-asked-to-shift-to-navi-mumbai-explained/article71700802.ece already exists.
+2026-11-14 10:05:06,435 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/karnataka/fear-of-diagnosis-keeping-people-away-from-diabetes-screening-finds-idf-study/article71698419.ece already exists.
+2026-11-14 10:05:06,435 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/andhra-pradesh/from-policy-to-talent-amaravati-quantum-valleys-innovation-blueprint/article71692805.ece already exists.
+2026-11-14 10:05:07,256 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/justice-karnans-incident-brought-judicial-misconduct-to-the-forefront/article71697857.ece
+2026-11-14 10:05:07,256 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:05:07,295 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (969 words).
+2026-11-14 10:05:07,350 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/india-news/trainee-aircraft-skids-off-runway-at-solapur-airport-during-take-off-12316819#publisher=newsstand already exists.
+2026-11-14 10:05:07,760 - INFO - [NDTV] Article: https://www.ndtv.com/delhi-news/chhath-puja-2026-bamboo-barricades-murals-tents-delhi-readies-1-482-ghats-for-chhath-puja-12325727#publisher=newsstand
+2026-11-14 10:05:07,760 - INFO - [NDTV] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:05:08,071 - WARNING - [The Hindu] FAILED with 'requests_browser' (content was too short: 59 words).
+2026-11-14 10:05:09,799 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/justice-karnans-incident-brought-judicial-misconduct-to-the-forefront/article71697857.ece
+2026-11-14 10:05:09,799 - INFO - [The Hindu] Attempt 2/2: Trying with 'selenium_browser' strategy...
+2026-11-14 10:05:10,853 - INFO - >>> SUCCESSFULLY SAVED [ID: 152873] - Ball tampering in cricket: The science, history and methods behind it from Indian Express (969 words)
+2026-11-14 10:05:10,863 - INFO - [NDTV] Page content loaded.
+2026-11-14 10:05:10,977 - INFO - [NDTV] Success with 'selenium_browser'. Found content (716 words).
+2026-11-14 10:05:13,727 - INFO - >>> SUCCESSFULLY SAVED [ID: 152874] - Bamboo Barricades, Murals, Tents: Delhi Readies 1,482 Ghats For Chhath Puja from NDTV (716 words)
+2026-11-14 10:05:14,476 - INFO - [The Hindu] Page content loaded.
+2026-11-14 10:05:14,477 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/world-news/microsoft-says-most-services-back-online-after-hours-of-global-disruption-12325651#publisher=newsstand already exists.
+2026-11-14 10:05:14,477 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/world-news/us-ground-stop-flight-shutdown-old-system-data-overload-what-led-to-us-grounding-over-8-000-flights-12325610#publisher=newsstand already exists.
+2026-11-14 10:05:14,477 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/india-news/chutkulon-ki-sarkar-in-punjab-nayab-saini-takes-swipe-at-bhagwant-mann-12325569#publisher=newsstand already exists.
+2026-11-14 10:05:14,478 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/gurgaon-news/gurugram-car-chase-news-a-km-from-home-gurugram-man-says-he-and-wife-chased-by-van-on-diwali-night-12325318#publisher=newsstand already exists.
+2026-11-14 10:05:14,478 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/india-news/traders-flag-50-hike-in-airfares-amid-wedding-season-seek-centres-help-12325506#publisher=newsstand already exists.
+2026-11-14 10:05:14,478 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/india-news/3-lost-foetuses-2-escapes-the-troubled-journey-of-dooars-rani-12325474#publisher=newsstand already exists.
+2026-11-14 10:05:14,478 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/india-news/yes-bank-rejects-the-banker-report-claiming-it-lost-3-4-million-in-cyber-fraud-12325420#publisher=newsstand already exists.
+2026-11-14 10:05:14,478 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/andhra-pradesh-news/students-suicide-attempt-over-fee-dues-triggers-political-row-in-andhra-pradesh-12325383#publisher=newsstand already exists.
+2026-11-14 10:05:14,478 - INFO - [NDTV] Early skip: URL https://www.ndtv.com/india-news/2-year-old-dies-as-pop-pop-crackers-burst-in-his-mouth-in-chhattisgarh-12325348#publisher=newsstand already exists.
+2026-11-14 10:05:14,480 - INFO - [NDTV] (Thread) Finished. Shutting down its Selenium driver.
+2026-11-14 10:05:14,480 - INFO - [Indian Express] Article: https://indianexpress.com/article/lifestyle/health/vidyut-jammwal-calls-carbs-food-for-brain-10829342/
+2026-11-14 10:05:14,480 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:05:14,617 - INFO - [NDTV] driver.quit() successful.
+2026-11-14 10:05:17,385 - WARNING - [The Hindu] FAILED with 'selenium_browser' (content was too short: 59 words).
+2026-11-14 10:05:17,385 - ERROR - [The Hindu] All scrape strategies failed for https://www.thehindu.com/news/national/justice-karnans-incident-brought-judicial-misconduct-to-the-forefront/article71697857.ece. Falling back to RSS description.
+2026-11-14 10:05:17,385 - WARNING - SKIPPED (GLOBAL WORD LIMIT): Article 'Justice Karnan’s incident brought judicial misconduct to the forefront' from The Hindu has only 33 words (Min: 90).
+2026-11-14 10:05:18,853 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/andhra-pradesh/inside-amaravatis-pioneering-leap-to-quantum-frontier/article71692735.ece already exists.
+2026-11-14 10:05:19,229 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/telangana/child-sexual-abuse-when-boys-voices-break/article71692792.ece
+2026-11-14 10:05:19,229 - INFO - [The Hindu] Attempt 1/2: Trying with 'requests_browser' strategy...
+2026-11-14 10:05:19,592 - WARNING - [The Hindu] FAILED with 'requests_browser' (content was too short: 46 words).
+2026-11-14 10:05:20,487 - INFO - [The Hindu] Article: https://www.thehindu.com/news/national/telangana/child-sexual-abuse-when-boys-voices-break/article71692792.ece
+2026-11-14 10:05:20,488 - INFO - [The Hindu] Attempt 2/2: Trying with 'selenium_browser' strategy...
+2026-11-14 10:05:22,563 - INFO - [The Hindu] Page content loaded.
+2026-11-14 10:05:22,682 - WARNING - [The Hindu] FAILED with 'selenium_browser' (content was too short: 46 words).
+2026-11-14 10:05:22,684 - ERROR - [The Hindu] All scrape strategies failed for https://www.thehindu.com/news/national/telangana/child-sexual-abuse-when-boys-voices-break/article71692792.ece. Falling back to RSS description.
+2026-11-14 10:05:22,684 - WARNING - SKIPPED (GLOBAL WORD LIMIT): Article 'Child sexual abuse: When boys’ voices break' from The Hindu has only 31 words (Min: 90).
+2026-11-14 10:05:23,252 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/kerala/keralam-government-sanctions-11-crore-for-road-development-in-kochi/article71698108.ece already exists.
+2026-11-14 10:05:23,252 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/opinion/lead/to-strengthen-the-supreme-court-divide-it/article71698099.ece already exists.
+2026-11-14 10:05:23,252 - INFO - [The Hindu] Early skip: URL https://www.thehindu.com/news/national/andhra-pradesh/algae-based-artificial-tree-to-help-check-air-pollution-in-guntur/article71697256.ece already exists.
+2026-11-14 10:05:23,253 - INFO - [The Hindu] (Thread) Finished. Shutting down its Selenium driver.
+2026-11-14 10:05:23,299 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:05:23,348 - INFO - [The Hindu] driver.quit() successful.
+2026-11-14 10:05:23,467 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (473 words).
+2026-11-14 10:05:26,000 - INFO - >>> SUCCESSFULLY SAVED [ID: 152875] - Vidyut Jammwal warns against cutting out carbs: ‘Your brain is not functioning at its peak’ from Indian Express (473 words)
+2026-11-14 10:05:28,266 - INFO - [Indian Express] Article: https://indianexpress.com/article/entertainment/tamil/shruti-haasan-father-kamal-haasan-only-paid-for-education-had-no-money-10962807/
+2026-11-14 10:05:28,266 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:05:52,394 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:05:52,501 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (567 words).
+2026-11-14 10:05:55,180 - INFO - >>> SUCCESSFULLY SAVED [ID: 152876] - ‘I had no money’: Shruti Haasan says father Kamal Haasan only paid for her education from Indian Express (567 words)
+2026-11-14 10:05:57,448 - INFO - [Indian Express] Article: https://indianexpress.com/article/legal-news/railway-season-ticket-train-disruption-haryana-man-wins-rs-5000-10962907/
+2026-11-14 10:05:57,448 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:06:14,839 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:06:14,955 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (790 words).
+2026-11-14 10:06:17,788 - INFO - >>> SUCCESSFULLY SAVED [ID: 152877] - Railway ‘fails to extend’ season ticket despite train disruption, Haryana man wins Rs 5,000 from Indian Express (790 words)
+2026-11-14 10:06:19,927 - INFO - [Indian Express] Article: https://indianexpress.com/article/world/elon-musk-signs-petition-in-support-of-nvidia-chief-jensen-huang10962919-10962919/
+2026-11-14 10:06:19,927 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:06:29,169 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:06:29,299 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (287 words).
+2026-11-14 10:06:32,240 - INFO - >>> SUCCESSFULLY SAVED [ID: 152878] - ‘Reinstate Jensen’: Elon Musk signs petition in support of Nvidia chief from Indian Express (287 words)
+2026-11-14 10:06:34,353 - INFO - [Indian Express] Article: https://indianexpress.com/article/india/jitu-patwari-calls-himself-digvijaya-singhs-political-son-but-bjp-has-a-warning-for-him-10962926/
+2026-11-14 10:06:34,353 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:06:35,549 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:06:35,753 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (789 words).
+2026-11-14 10:06:38,550 - INFO - >>> SUCCESSFULLY SAVED [ID: 152879] - Jitu Patwari calls himself Digvijaya Singh’s ‘political son’ but BJP has a warning for him from Indian Express (789 words)
+2026-11-14 10:06:40,849 - INFO - [Indian Express] Article: https://indianexpress.com/article/cities/mumbai/ncp-merger-talks-sunetra-pawar-supriya-sule-stand-10962928/
+2026-11-14 10:06:40,850 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:06:46,308 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:06:46,546 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (318 words).
+2026-11-14 10:06:49,188 - INFO - >>> SUCCESSFULLY SAVED [ID: 152880] - NCP merger talks hit dead end? Sunetra Pawar denies seeking MLAs’ opinion from Indian Express (318 words)
+2026-11-14 10:06:50,927 - INFO - [Indian Express] Article: https://indianexpress.com/article/trending/trending-globally/georgian-girl-dances-to-shah-rukh-khans-mehendi-lagake-rakhna-netizens-applaud-10962906/
+2026-11-14 10:06:50,927 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:06:57,583 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:06:57,697 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (219 words).
+2026-11-14 10:07:00,450 - INFO - >>> SUCCESSFULLY SAVED [ID: 152881] - Georgian girl dances to Shah Rukh Khan’s ‘Mehendi Lagake Rakhna’; netizens applaud from Indian Express (219 words)
+2026-11-14 10:07:01,788 - INFO - [Indian Express] Article: https://indianexpress.com/article/entertainment/bollywood/ramayana-yet-to-make-ott-deal-dil-raju-predicts-box-office-rs-2000-crore-worldwide-10962803/
+2026-11-14 10:07:01,788 - INFO - [Indian Express] Attempt 1/1: Trying with 'selenium_browser' strategy...
+2026-11-14 10:07:03,791 - INFO - [Indian Express] Page content loaded.
+2026-11-14 10:07:03,891 - INFO - [Indian Express] Success with 'selenium_browser'. Found content (562 words).
+2026-11-14 10:07:06,587 - INFO - >>> SUCCESSFULLY SAVED [ID: 152882] - ‘Ramayana makers yet to make OTT deal,’ reveals Dil Raju; predicts Rs 2,000 cr box office from Indian Express (562 words)
+2026-11-14 10:07:07,157 - INFO - [Indian Express] Target reached: Successfully saved 10 new articles.
+2026-11-14 10:07:07,158 - INFO - [Indian Express] (Thread) Finished. Shutting down its Selenium driver.
+2026-11-14 10:07:07,370 - INFO - [Indian Express] driver.quit() successful.
+2026-11-14 10:07:07,371 - INFO - Shutting down thread pool (wait=False)...
+2026-11-14 10:07:07,371 - INFO - Scraped: 6 Al Jazeera, 2 BBC, 6 Economic Times, 10 Indian Express, 9 NDTV, 11 The Hindu, 4 Times of India, 2 Wired articles. (Total saved: 50) in 268s
+2026-11-14 10:07:07,371 - INFO - --- Scraping job finished ---
+2026-11-14 10:07:07,397 - INFO - --- Scraper service stopped. ---
+2026-11-14 10:07:07,397 - INFO - --- Main thread finished. Forcing process exit to kill zombie threads. ---
